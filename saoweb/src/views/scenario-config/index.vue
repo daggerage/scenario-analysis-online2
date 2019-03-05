@@ -9,6 +9,14 @@
               :options="unitConfs"
               v-model="form.unitConf"
             />
+            <el-tooltip
+              placement="right"
+              effect="dark">
+              <div slot="content">
+                <pre style="font-size: 14px;">{{question.bmp}}</pre>
+              </div>
+              <i class="el-icon-question" style="margin: 0 10px;"></i>
+            </el-tooltip>
           </el-form-item>
           <el-form-item label="智能优化算法" prop="algorithm">
             <el-select v-model="form.algorithm">
@@ -90,6 +98,14 @@ export default {
       rules:{
         unitConf:[{required:true, message:"请选择配置单元与配置规则", trigger:"change"}],
         algorithm:[{required:true, message:"请选择智能优化算法",trigger:"change"}]
+      },
+      question:{
+        bmp:"The following pairs are supported:\n" +
+          "BMPsCfgUnit  BMPsCfgMethod\n" +
+          "HRU          RAND, SUIT\n" +
+          "EXPLICITHRU  RAND, SUIT\n" +
+          "CONNFIELD    RAND, SUIT, UPDOWN\n" +
+          "SLPPOS       RAND, SUIT, UPDOWN, HILLSLP"
       }
     }
   },
