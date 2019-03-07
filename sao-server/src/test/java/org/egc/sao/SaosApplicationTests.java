@@ -1,4 +1,4 @@
-package com.lreis;
+package org.egc.sao;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

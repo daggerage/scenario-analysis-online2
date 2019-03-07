@@ -1,35 +1,27 @@
 <template>
   <div class="app-container">
 
-    <el-table v-loading="listLoading" :data="list" border fit highlight-current-row style="width: 100%">
+    <el-table :data="history" border fit highlight-current-row style="width: 100%">
 
-      <el-table-column align="center" label="ID" width="80">
+      <el-table-column align="center" label="ID" width="80" prop="id"></el-table-column>
+
+      <el-table-column width="180px" align="center" label="Date" prop="date"></el-table-column>
+
+      <el-table-column width="120px" align="center" label="config" >
         <template slot-scope="scope">
-          <span>{{ scope.row.id }}</span>
+          <span>{{scope.row.config[0]+' / '+scope.row.config[1]}}</span>
         </template>
       </el-table-column>
 
-      <el-table-column width="180px" align="center" label="Date">
+      <el-table-column width="100px" label="Algorithm">
         <template slot-scope="scope">
-          <span>{{ scope.row.timestamp | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
+          <span>{{scope.row.algorithm[0]+' - '+scope.row.algorithm[1]}}</span>
         </template>
       </el-table-column>
 
-      <el-table-column width="120px" align="center" label="Author">
+      <el-table-column class-name="status-col" label="Status" width="200px">
         <template slot-scope="scope">
-          <span>{{ scope.row.author }}</span>
-        </template>
-      </el-table-column>
-
-      <el-table-column width="100px" label="Importance">
-        <template slot-scope="scope">
-          <svg-icon v-for="n in +scope.row.importance" :key="n" icon-class="star" class="meta-item__icon"/>
-        </template>
-      </el-table-column>
-
-      <el-table-column class-name="status-col" label="Status" width="110">
-        <template slot-scope="scope">
-          <el-tag :type="scope.row.status | statusFilter">{{ scope.row.status }}</el-tag>
+          <el-progress :percentage="scope.row.progress"></el-progress>
         </template>
       </el-table-column>
 
@@ -39,7 +31,8 @@
             <el-input v-model="scope.row.title" class="edit-input" size="small"/>
             <el-button class="cancel-btn" size="small" icon="el-icon-refresh" type="warning" @click="cancelEdit(scope.row)">cancel</el-button>
           </template>
-          <span v-else>{{ scope.row.title }}</span>
+          <span v-else>{{ scope.row.
+            title }}</span>
         </template>
       </el-table-column>
 
@@ -76,7 +69,15 @@
         listQuery: {
           page: 1,
           limit: 10
-        }
+        },
+        history:[{
+          id:1,
+          title:'Untitled',
+          date:'2019-3-4 17:52:30',
+          config:['HRU','SUIT'],
+          algorithm:[2,4],
+          progress:50
+        }]
       }
     },
     created() {
@@ -125,3 +126,4 @@
     top: 10px;
   }
 </style>
+

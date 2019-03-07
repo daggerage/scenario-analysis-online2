@@ -1,4 +1,4 @@
-package com.lreis.controller;
+package org.egc.sao.controller;
 
 
 import org.springframework.stereotype.Controller;

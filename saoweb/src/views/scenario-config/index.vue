@@ -53,7 +53,7 @@ import Map from '@/components/Map/MapOverviewComponent'
 const configMethods = {
   RAND: { value: 'RAND', label: 'Random' },
   SUIT: { value: 'SUIT', label: 'Suit' },
-  UPDOWN: { value: 'UPDOWN', label: 'Up-Down dsadsadsadasasdsada' },
+  UPDOWN: { value: 'UPDOWN', label: 'Up-Down' },
   HILLSLP: { value: 'HILLSLP', label: 'Hillslope' }
 }
 export default {
