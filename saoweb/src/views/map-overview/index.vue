@@ -3,16 +3,16 @@
     <el-row>
       <el-col :xs="12" :sm="12" :lg="12">
         <el-select v-model="unit" placeholder="请选择划分单元">
-          <el-option v-for="d of delineations" :key="d.value" :label="d.name" :value="d.value"></el-option>
+          <el-option v-for="d of delineations" :key="d.value" :label="d.name" :value="d.value"/>
         </el-select>
       </el-col>
       <el-col :xs="24" :sm="18" :lg="18">
         <map-overview2
           id="map-overview"
-          class="overview"
-          dataUrl="/data/field.geojson"
           :interactive="true"
           :emit-feature="true"
+          class="overview"
+          data-url="/data/field.geojson"
           @displayFeature="fillFeatureProps"/>
       </el-col>
 
@@ -50,7 +50,7 @@ export default {
         { name: '地块', value: 'CONNFIELD' },
         { name: 'HRU', value: 'HRU' }
       ],
-      unit:""
+      unit: ''
     }
   },
   methods: {

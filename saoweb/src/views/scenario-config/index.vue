@@ -3,7 +3,7 @@
     <el-row :gutter="32">
       <el-col :xs="24" :sm="12" :lg="8">
         <p>请进行BMP情景配置，详细说明请参考 <a href="#" style="color: #0af;">帮助</a></p>
-        <el-form :rules="rules" ref="form" :model="form" label-width="80px" label-position="top">
+        <el-form ref="form" :rules="rules" :model="form" label-width="80px" label-position="top">
           <el-form-item label="单元划分方法 / 配置规则" prop="unitConf">
             <el-cascader
               :options="unitConfs"
@@ -13,9 +13,9 @@
               placement="right"
               effect="dark">
               <div slot="content">
-                <pre style="font-size: 14px;">{{question.bmp}}</pre>
+                <pre style="font-size: 14px;">{{ question.bmp }}</pre>
               </div>
-              <i class="el-icon-question" style="margin: 0 10px;"></i>
+              <i class="el-icon-question" style="margin: 0 10px;"/>
             </el-tooltip>
           </el-form-item>
           <el-form-item label="智能优化算法" prop="algorithm">
@@ -58,7 +58,7 @@ const configMethods = {
 }
 export default {
   name: 'Scenario',
-  components:{Map},
+  components: { Map },
   data() {
     return {
       form: {
@@ -95,36 +95,36 @@ export default {
         { name: 'None', value: 'NONE' },
         { name: 'NSGAII', value: 'NSGAII' }
       ],
-      rules:{
-        unitConf:[{required:true, message:"请选择配置单元与配置规则", trigger:"change"}],
-        algorithm:[{required:true, message:"请选择智能优化算法",trigger:"change"}]
+      rules: {
+        unitConf: [{ required: true, message: '请选择配置单元与配置规则', trigger: 'change' }],
+        algorithm: [{ required: true, message: '请选择智能优化算法', trigger: 'change' }]
       },
-      question:{
-        bmp:"The following pairs are supported:\n" +
-          "BMPsCfgUnit  BMPsCfgMethod\n" +
-          "HRU          RAND, SUIT\n" +
-          "EXPLICITHRU  RAND, SUIT\n" +
-          "CONNFIELD    RAND, SUIT, UPDOWN\n" +
-          "SLPPOS       RAND, SUIT, UPDOWN, HILLSLP"
+      question: {
+        bmp: 'The following pairs are supported:\n' +
+          'BMPsCfgUnit  BMPsCfgMethod\n' +
+          'HRU          RAND, SUIT\n' +
+          'EXPLICITHRU  RAND, SUIT\n' +
+          'CONNFIELD    RAND, SUIT, UPDOWN\n' +
+          'SLPPOS       RAND, SUIT, UPDOWN, HILLSLP'
       }
     }
   },
-  methods:{
-    onSubmit(formName){
-      this.$refs[formName].validate((valid)=>{
-        if(valid){
+  methods: {
+    onSubmit(formName) {
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
           this.$message({
-            message:" 提交成功",
-            type:"success"
+            message: ' 提交成功',
+            type: 'success'
           })
-        }else{
+        } else {
           this.$message({
-            message:"提交失败",
-            type:"error"
+            message: '提交失败',
+            type: 'error'
           })
         }
       })
-    },
+    }
   }
 }
 </script>

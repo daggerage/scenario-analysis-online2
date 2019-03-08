@@ -17,19 +17,19 @@ import { Fill, Stroke, Style, Text } from 'ol/style'
 
 export default {
   name: 'MapOverview0',
-  props:{
-    dataUrl:{
-      type:String,
-      default:'/data/field.geojson'
+  props: {
+    dataUrl: {
+      type: String,
+      default: '/data/field.geojson'
     },
-    interactive:{
-      type:Boolean,
-      default:false
+    interactive: {
+      type: Boolean,
+      default: false
     },
-    emitFeature:{
-      type:Boolean,
-      default:false
-    },
+    emitFeature: {
+      type: Boolean,
+      default: false
+    }
   },
   mounted() {
     this.initMap()
@@ -83,8 +83,8 @@ export default {
       })
       map.addLayer(vectorLayer)
 
-      var componentProps=this
-      if(componentProps.interactive) {
+      var componentProps = this
+      if (componentProps.interactive) {
         var highlightHoverStyle = new Style({
           stroke: new Stroke({
             color: '#f00',
@@ -126,7 +126,7 @@ export default {
         var featureHoverOverlay = new VectorLayer({
           source: new VectorSource(),
           map: map,
-          style: function (feature) {
+          style: function(feature) {
             // highlightStyle.getText().setText(feature.get('ObjectID'));
             return highlightHoverStyle
           }
@@ -134,12 +134,12 @@ export default {
         var featureClickOverlay = new VectorLayer({
           source: new VectorSource(),
           map: map,
-          style: function (feature) {
+          style: function(feature) {
             return highlightClickStyle
           }
         })
-        var getFeatureByPixel = function (pixel) {
-          return map.forEachFeatureAtPixel(pixel, function (feature) {
+        var getFeatureByPixel = function(pixel) {
+          return map.forEachFeatureAtPixel(pixel, function(feature) {
             return feature
           })
         }
@@ -164,7 +164,7 @@ export default {
         }
 
         var that = this
-        var emitFeature = function (feature) {
+        var emitFeature = function(feature) {
           that.$emit('displayFeature', feature)
         }
         var highlightHover
@@ -172,7 +172,7 @@ export default {
         var featureDisplayByHover = new FeatureDisplay(highlightHover, featureHoverOverlay)
         var featureDisplayByClick = new FeatureDisplay(highlightClick, featureClickOverlay)
 
-        map.on('pointermove', function (evt) {
+        map.on('pointermove', function(evt) {
           if (evt.dragging) {
             return
           }
@@ -180,7 +180,7 @@ export default {
           var feature = getFeatureByPixel(pixel)
           featureDisplayByHover.clearAndDisplay(feature)
         })
-        map.on('click', function (evt) {
+        map.on('click', function(evt) {
           var feature = getFeatureByPixel(evt.pixel)
           featureDisplayByClick.clearAndDisplay(feature)
           if (componentProps.emitFeature) {
@@ -188,7 +188,6 @@ export default {
           }
         })
       }
-
     }
   }
 }

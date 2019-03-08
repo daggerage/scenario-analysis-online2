@@ -8,7 +8,7 @@
       class="home-title">
 
       <ul type="none" class="home-list">
-        <li v-for="f in featureData" :key="f.feature"><i class="el-icon-check"></i>{{ f.feature }}</li>
+        <li v-for="f in featureData" :key="f.feature"><i class="el-icon-check"/>{{ f.feature }}</li>
       </ul>
     </el-row>
 
