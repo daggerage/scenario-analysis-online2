@@ -1,7 +1,7 @@
 package org.egc.sao.config;
 
 import com.mongodb.MongoClient;
-import org.egc.sao.dao.mongodb.ArealStructManagementDao;
+import org.egc.sao.dao.mongodb.StructBMPDao;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.annotation.Bean;
@@ -17,7 +17,7 @@ import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
 @Configuration
-@EnableMongoRepositories(basePackageClasses = ArealStructManagementDao.class)
+@EnableMongoRepositories(basePackageClasses = StructBMPDao.class)
 public class MongoConfig extends AbstractMongoConfiguration {
     @Override
     protected String getDatabaseName() {

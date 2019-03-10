@@ -5,18 +5,16 @@
         <el-tabs class="bmp-tab-first">
 
           <el-tab-pane label="结构化措施">
-            <display-table
-
-              :data-brief="dataBrief"
-              :data-detail="dataDetail"
-            >
-            </display-table>
+            <struct-bmp-table
+              :data="structBMPData"
+              bmp-type="struct"/>
           </el-tab-pane>
 
-          <el-tab-pane label="非结构化措施" >
-            <el-tabs type="border-card" class="bmp-tab-second">
-              <el-tab-pane label="Plant Management">...</el-tab-pane>
-            </el-tabs>
+          <el-tab-pane label="非结构化措施">
+            <el-tag>植物管理措施</el-tag>
+            <plant-bmp-table
+              :data="plantBMPData"
+              bmp-type="plant"/>
           </el-tab-pane>
 
         </el-tabs>
@@ -26,26 +24,37 @@
   </div>
 </template>
 <script>
-import { fetchStructBMPs } from '@/api/bmp'
-import DisplayTable from './DisplayTableComponent'
+import {fetchStructBMPs,fetchPlantBMPs} from '@/api/bmp';
+
+import StructBmpTable from './StructBmpTable'
+import PlantBmpTable from './PlantBmpTable'
+
 export default {
   name: 'BMPDisplay',
-  components:{DisplayTable},
+  components: { StructBmpTable,PlantBmpTable },
   data() {
     return {
-      dataBrief: [],
-      dataDetail: []
+      structBMPData: [],
+      plantBMPData: []
     }
   },
   created() {
     this.fetchStructBMPs()
+    this.fetchPlantBMPs()
   },
   methods: {
     fetchStructBMPs() {
       fetchStructBMPs().then(res => {
-        if(res.data.status&&res.data.status===200){
-          dataBrief=res.data.brief;
-          dataDetail=res.data.detail;
+        if (res.data.status === 200) {
+          this.structBMPData = res.data.data
+        }
+      })
+    },
+    fetchPlantBMPs() {
+      fetchPlantBMPs().then(res => {
+        console.log('now fetch plant BMP')
+        if (res.data.status === 200) {
+          this.plantBMPData = res.data.data
         }
       })
     }

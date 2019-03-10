@@ -1,21 +1,27 @@
 package org.egc.sao.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import org.bson.codecs.pojo.annotations.BsonIgnore;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 @Data
 @Accessors(chain = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Document(collection = "AREAL_STRUCT_MANAGEMENT")
-public class  ArealStructManagement {
+public class StructBMP {
     /*
     example:
         "_id" : ObjectId("5c48418a32aca72b891a482e"),
@@ -32,16 +38,23 @@ public class  ArealStructManagement {
         "DESC" : "FENGJIN"
      */
     @Id
-    private ObjectId id;
+    private String id;
     private int subscenario;
     private String name;
     private String reference;
+
+    @JsonIgnore
     private String parameters;
+
     private int effectiveness;
     private double opex;
-    private int incomeSnakeTestDBIFYouCan;
     private String landuse;
     private String slppos;
     private double capex;
     private String desc;
+
+    // This annotation is not ****ing working, so just don't assign this field when inserting
+    //[key,name,change,impact]
+    @BsonIgnore
+    private ArrayList<ArrayList<String>> paramDetail;
 }

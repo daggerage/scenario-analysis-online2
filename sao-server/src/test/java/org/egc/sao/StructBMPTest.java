@@ -1,8 +1,8 @@
 package org.egc.sao;
 
 import org.egc.sao.base.ResInfo;
-import org.egc.sao.dao.mongodb.ArealStructManagementDao;
-import org.egc.sao.domain.ArealStructManagement;
+import org.egc.sao.dao.mongodb.StructBMPDao;
+import org.egc.sao.domain.StructBMP;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,14 +14,14 @@ import java.util.List;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class ArealStructManagementTest {
+public class StructBMPTest {
 
     @Autowired
-    ArealStructManagementDao dao;
+    StructBMPDao dao;
 
     @Test
     public void findAllStructBMP(){
-        List<ArealStructManagement> list= dao.findAll();
+        List<StructBMP> list= dao.findAll();
         System.out.println(Arrays.toString(list.toArray()));
     }
 

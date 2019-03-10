@@ -13,11 +13,5 @@ public class SaosApplication {
 		SpringApplication.run(SaosApplication.class, args);
 	}
 
-//	@Bean
-//	public Jackson2ObjectMapperBuilder jacksonBuilder() {
-//		Jackson2ObjectMapperBuilder b = new Jackson2ObjectMapperBuilder();
-//		b.propertyNamingStrategy(PropertyNamingStrategy.UPPER_CAMEL_CASE);
-//		return b;
-//	}
 }
 
