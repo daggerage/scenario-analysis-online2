@@ -5,7 +5,7 @@ export function scenarioAnalysis(structBmp, plantBmp, configUnit, configMethod, 
     url: 'v1/scenario/analysis',
     method: 'post',
     params: {
-      structBMP: structBmp,
+      structBmp: structBmp,
       plantBmp: plantBmp,
       configUnit: configUnit,
       configMethod: configMethod,

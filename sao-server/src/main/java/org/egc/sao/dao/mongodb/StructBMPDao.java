@@ -10,4 +10,6 @@ import java.util.List;
 @Repository
 public interface StructBMPDao extends MongoRepository<StructBMP, String> {
     List<StructBMP> findAllBySubscenario(int subscenario);
+
+    List<StructBMP> findAllById(int subscenario);
 }

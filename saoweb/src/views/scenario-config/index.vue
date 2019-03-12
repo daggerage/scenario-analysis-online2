@@ -6,19 +6,55 @@
 
         <el-form ref="form" :rules="rules" :model="form" label-width="80px" label-position="top">
 
-          <el-form-item label="应用哪些最佳管理措施">
-            <el-select v-model="form.bmps" multiple clearable prop="bmps" placeholder="请选择" style="width: 70%;">
-              <el-option-group
-                v-for="group in bmps"
-                :key="group.label"
-                :label="group.label">
-                <el-option
-                  v-for="item in group.options"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value">
-                </el-option>
-              </el-option-group>
+          <!--<el-form-item label="应用哪些最佳管理措施">-->
+            <!--<el-select v-model="form.bmps" multiple clearable prop="bmps" placeholder="请选择" style="width: 70%;">-->
+              <!--<el-option-group-->
+                <!--v-for="group in bmps"-->
+                <!--:key="group.label"-->
+                <!--:label="group.label">-->
+                <!--<el-option-->
+                  <!--v-for="item in group.options"-->
+                  <!--:key="item.value"-->
+                  <!--:label="item.label"-->
+                  <!--:value="item.value">-->
+                <!--</el-option>-->
+              <!--</el-option-group>-->
+            <!--</el-select>-->
+          <!--</el-form-item>-->
+
+          <el-form-item label="最佳管理措施" prop="structBmps" >
+            <el-select
+              multiple
+              style="width: 70%;"
+              :options="structBmps"
+              v-model="form.structBmps"
+              placeholder="选择结构性措施">
+              <el-option
+                v-for="bmp in structBmps"
+                :key="bmp.value"
+                :label="bmp.label"
+                :value="bmp.value">
+                <span class="bmp-label">{{ bmp.label }}</span>
+                <span class="bmp-category">{{ bmp.category }}</span>
+              </el-option>
+            </el-select>
+          </el-form-item>
+
+          <el-form-item prop="plantBmps" >
+            <el-select
+              multiple
+              style="width: 70%;"
+              :options="plantBmps"
+              v-model="form.plantBmps"
+              placeholder="选择作物管理措施">
+              <el-option
+                v-for="bmp in plantBmps"
+                :key="bmp.value"
+                :label="bmp.label"
+                :value="bmp.value">
+                <span class="bmp-label">{{ bmp.label }}</span>
+                <span class="bmp-category">{{ bmp.category }}</span>
+              </el-option>
             </el-select>
           </el-form-item>
 
@@ -32,7 +68,7 @@
               placement="right"
               effect="dark">
               <div slot="content">
-                <pre style="font-size: 14px;">{{ question.bmp }}</pre>
+                <pre style="font-size: 14px;">{{ question.configUnitAndMethod }}</pre>
               </div>
               <i class="el-icon-question" style="margin: 0 10px;"/>
             </el-tooltip>
@@ -88,21 +124,15 @@ export default {
   data() {
     return {
       form: {
-        bmps:[],
+        structBmps:[],
+        plantBmps:[],
         unitConf: [],
         algorithm: '',
         generationNum: 2,
         poluationSize: 4
       },
-      bmps:[{
-        label:'结构性措施',
-        options:[]
-      },{
-        label:'非结构性措施',
-        options:[
-          {value:'RICEPADDYCROPROTATION',label:'作物管理措施-稻麦轮作'}
-        ]
-      }],
+      structBmps:[],
+      plantBmps:[{value:'RICEPADDYCROPROTATION',label:'稻麦轮作',category:'作物管理措施'}],
       delineations: [
         { name: '坡位', value: 'SLOPPOS' },
         { name: '地块', value: 'CONNFIELD' },
@@ -132,12 +162,13 @@ export default {
         { name: 'NSGAII', value: 'NSGAII' }
       ],
       rules: {
-        selectedBmps: [{ required: true, message: '请选择应用哪些最佳管理措施', trigger: 'change' }],
+        structBmps: [{ required: true, message: '请选择结构性措施', trigger: 'change' }],
+        plantBmps: [{ required: true, message: '请选择非结构性措施', trigger: 'change' }],
         unitConf: [{ required: true, message: '请选择配置单元与配置规则', trigger: 'change' }],
         algorithm: [{ required: true, message: '请选择智能优化算法', trigger: 'change' }]
       },
       question: {
-        bmp: 'The following pairs are supported:\n' +
+        configUnitAndMethod: 'The following pairs are supported:\n' +
           'BMPsCfgUnit  BMPsCfgMethod\n' +
           'HRU          RAND, SUIT\n' +
           'EXPLICITHRU  RAND, SUIT\n' +
@@ -150,15 +181,9 @@ export default {
     onSubmit(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          let usePlantBmp = false;
-          console.log(this.form.bmps)
-          if (this.form.bmps.includes('RICEPADDYCROPROTATION')) {
-            usePlantBmp = true
-            this.form.bmps.splice(this.form.bmps.lastIndexOf('RICEPADDYCROPROTATION'), 1)
-          }
+          let usePlantBmp = this.form.plantBmps.length > 0
           let selectedBmpString=''
-          for(let bmp of this.form.bmps){
-            console.log(bmp);
+          for(let bmp of this.form.structBmps){
             selectedBmpString+=bmp+','
           }
           return new Promise((resolve, reject) => {
@@ -174,7 +199,6 @@ export default {
                   message: ' 提交成功',
                   type: 'success'
                 })
-                // console.log(response)
                 resolve()
               }
             }).catch(error => {
@@ -194,9 +218,10 @@ export default {
           for(let bmp of res.data.data){
             let option={
               value:bmp.id,
-              label:replaceBmpName(bmp.name)
+              label:replaceBmpName(bmp.name),
+              category:'结构性措施'
             }
-            this.bmps[0].options.push(option)
+            this.structBmps.push(option)
           }
         }
       })
@@ -218,5 +243,13 @@ export default {
 </script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
-
+  .bmp-label{
+    float: left;
+  }
+  .bmp-category{
+    float: right;
+    color: #8492a6;
+    font-size: 13px;
+    margin-right: 20px;
+  }
 </style>

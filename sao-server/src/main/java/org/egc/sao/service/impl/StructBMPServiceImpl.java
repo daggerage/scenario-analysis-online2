@@ -6,6 +6,7 @@ import org.egc.sao.service.StructBMPService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -20,6 +21,18 @@ public class StructBMPServiceImpl implements StructBMPService {
 
     @Override
     public List<StructBMP> findAllBySubscenario(int subscenario){return dao.findAllBySubscenario(subscenario);}
+
+    @Override
+    public StructBMP findById(String id){return dao.findById(id).orElse(null);}
+
+    @Override
+    public List<StructBMP> findAllByIds(String[] ids) {
+        ArrayList<StructBMP> result=new ArrayList<>();
+        for(String id:ids){
+            result.add(dao.findById(id).orElse(null));
+        }
+        return result;
+    }
 
     @Override
     public List<StructBMP> insert(List<StructBMP> asms) {
