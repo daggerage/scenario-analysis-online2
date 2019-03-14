@@ -1,9 +1,9 @@
 package org.egc.sao.controller;
 
+import org.egc.sao.domain.StructBMP;
 import org.egc.sao.base.ResInfo;
 import org.egc.sao.base.Result;
 import org.egc.sao.domain.PlantBMP;
-import org.egc.sao.domain.StructBMP;
 import org.egc.sao.service.PlantBMPService;
 import org.egc.sao.service.StructBMPService;
 import org.springframework.beans.factory.annotation.Autowired;

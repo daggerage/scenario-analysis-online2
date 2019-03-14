@@ -1,6 +1,5 @@
 package org.egc.sao.dao.mongodb;
 
-import org.bson.types.ObjectId;
 import org.egc.sao.domain.StructBMP;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;

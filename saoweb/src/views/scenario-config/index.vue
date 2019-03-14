@@ -125,9 +125,9 @@ export default {
     return {
       form: {
         structBmps:[],
-        plantBmps:[],
-        unitConf: [],
-        algorithm: '',
+        plantBmps:['RICEPADDYCROPROTATION'],
+        unitConf: ['HRU','SUIT'],
+        algorithm: 'NSGAII',
         generationNum: 2,
         poluationSize: 4
       },
@@ -222,17 +222,20 @@ export default {
               category:'结构性措施'
             }
             this.structBmps.push(option)
+            this.form.structBmps.push(bmp.id)//default
           }
         }
+        this.form.structBmps.splice(1,1)//default
       })
     },
     replaceBmpName,
-    selectAllBmp(){
-      for(let group of this.bmps){
-        for(let item of group.options){
-          this.form.bmps.push(item.value)
-        }
+    selectAll(){
+      for(let item of this.structBmps){
+          this.form.structBmps.push(item.value)
       }
+      this.form.plantBmps.push(this.plantBmps[0])
+      this.form.unitConf.push("HRU")
+      this.form.unitConf.push("SUIT")
     }
   },
   created(){

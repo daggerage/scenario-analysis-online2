@@ -4,6 +4,8 @@ public enum ResInfo {
     SUCCESS(200,"请求成功"),
     BAD_REQUEST(400,"请求错误"),
     NOT_FOUND(404,"未找到"),
+    CONFILICT(409,"与现有资源冲突"),
+    AUTH_FAIL(466,"认证失败"),
     INTERNAL_ERROR(500,"系统内部错误");
 
 
