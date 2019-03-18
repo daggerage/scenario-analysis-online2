@@ -30,7 +30,6 @@ public class UserController {
     ){
         if(us.findUser(new User().setEmail(email))==null){
             UUID id=UUID.randomUUID();
-            String timestamp= DateUtil.getStandardDateNow();
             User user=new User()
                     .setId(id)
                     .setName(name)
@@ -46,17 +45,18 @@ public class UserController {
 
     @RequestMapping(value = "account",method = RequestMethod.GET)
     public Result listUser(
-            @RequestParam String token
-//            @RequestParam(required = false) String id,
-//            @RequestParam String name,
-//            @RequestParam String email
+            @RequestParam(required = false) String token,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String email
     ){
-        if(!AuthUtil.isJwtValide(token)){
+        if(token!=null&&!AuthUtil.isJwtValide(token)){
             return new Result<>(ResInfo.AUTH_FAIL,null);
         }
 
         User user=new User()
-                .setId(UUID.fromString(token));
+                .setId(token!=null?UUID.fromString(token):null)
+                .setName(name)
+                .setEmail(email);
         User target = us.findUser(user);
         if(target==null){
             return new Result<>(ResInfo.NOT_FOUND,null);

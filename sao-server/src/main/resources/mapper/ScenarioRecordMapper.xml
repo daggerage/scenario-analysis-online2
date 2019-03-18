@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+    id
+    economy
+    environment
+    url
+ -->
+
+<mapper namespace="org.egc.sao.dao.postgresql.ScenarioRecordDao">
+    <sql id="Base_Column_List">
+      id,
+      created_on,
+      account_id,
+      scenario_analysis_result_id,
+      scenario_config_strategy_id,
+      scenario_unit_delineation_id,
+      optimize_algorithm_id,
+      title
+	</sql>
+
+    <select id="findAll" resultType="ScenarioRecord" parameterType="ScenarioRecord">
+        select
+          result,
+          scenario_record_id as id,
+          account_id,
+          optimize_algorithm,
+          scenario_unit_delineation,
+          scenario_config_strategy,
+          scenario_analysis_result_id,
+          created_on,
+          title
+        from v_records
+        <where>
+            <if test="sr.id!=null">AND scenario_record_id = #{sr.id}</if>
+            <if test="sr.accountId!=null">AND account_id = #{sr.accountId}</if>
+            <if test="sr.scenarioAnalysisResultId!=null">AND scenario_analysis_result_id = #{sr.scenarioAnalysisResultId}</if>
+        </where>
+    </select>
+
+    <insert id="insert" parameterType="ScenarioRecord">
+        INSERT INTO scenario_record(
+          <include refid="Base_Column_List" />
+        )
+        VALUES (
+            #{id},
+            #{createdOn},
+            #{accountId},
+            #{scenarioAnalysisResultId},
+            #{scenarioConfigStrategyId},
+            #{scenarioUnitDelineationId},
+            #{optimizeAlgorithmId},
+            #{title}
+        )
+    </insert>
+
+    <update id="updateTitle" parameterType="ScenarioAnalysisResult">
+        UPDATE scenario_analysis_result
+        <set>
+            <if test="title!=null">title=#{title}</if>
+        </set>
+        WHERE id=#{id}
+    </update>
+
+</mapper>

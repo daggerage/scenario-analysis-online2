@@ -11,8 +11,12 @@ import java.util.List;
 @Service
 public class PlantBMPServiceImpl implements PlantBMPService {
 
+    private final PlantBMPDao dao;
+
     @Autowired
-    PlantBMPDao dao;
+    public PlantBMPServiceImpl(PlantBMPDao dao) {
+        this.dao = dao;
+    }
 
     @Override
     public List<PlantBMP> findAll() {

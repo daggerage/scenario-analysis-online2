@@ -76,7 +76,7 @@ export const constantRouterMap = [
     redirect: 'map-overview',
     children: [
       {
-        path: 'map-overview',
+        path: '',
         component: () => import('@/views/map-overview/index'),
         name: 'MapOverview',
         meta: { title: 'mapOverview', icon: 'location-fill', noCache: true }
@@ -89,7 +89,7 @@ export const constantRouterMap = [
     redirect: 'bmp-display',
     children: [
       {
-        path: 'bmp-display',
+        path: '',
         component: () => import('@/views/bmp-display/index'),
         name: 'BMPDisplay',
         meta: { title: 'bmpDisplay', icon: 'detail-fill', noCache: true }
@@ -102,7 +102,7 @@ export const constantRouterMap = [
     redirect: 'scenario-config',
     children: [
       {
-        path: 'scenario-config',
+        path: '',
         component: () => import('@/views/scenario-config/index'),
         name: 'ScenarioConfig',
         meta: { title: 'scenarioConfig', icon: 'wrench-fill', noCache: true }
@@ -115,13 +115,21 @@ export const constantRouterMap = [
     redirect: 'scenario-history',
     children: [
       {
-        path: 'scenario-history',
+        path: '',
         component: () => import('@/views/scenario-history/index'),
         name: 'ScenarioHistory',
         meta: { title: 'scenarioHistory', icon: 'folder-fill', noCache: true }
+      },
+      {
+        path: 'detail',
+        component: () => import('@/views/scenario-history/detail'),
+        name: 'HistoryDetail',
+        hidden: true
       }
+
     ]
-  },
+  }
+
 ]
 
 export default new Router({
@@ -193,5 +201,5 @@ export const asyncRouterMap = [
   //     }
   //   ]
   // },
-  { path: '*', redirect: '/404', hidden: true }
+  // { path: '*', redirect: '/404', hidden: true }
 ]

@@ -17,22 +17,13 @@
  -->
 
 <mapper namespace="org.egc.sao.dao.postgresql.UserDao">
-    <!--<resultMap id="BaseResultMap" type="org.egc.sao.domain.User">-->
-        <!--<result column="id" property="id"/>-->
-        <!--<result column="name" property="name" />-->
-        <!--<result column="password" property="password" />-->
-        <!--<result column="email" property="email" />-->
-        <!--<result column="created_on" property="createdOn" />-->
-    <!--</resultMap>-->
-
-    <!--<parameterMap id="User" type="org.egc.sao.domain.User"/>-->
 
     <sql id="Base_Column_List">
       id,name,password,email,created_on
 	</sql>
 
 
-    <select id="findUser" resultType="User" parameterType="User">
+    <select id="findUser" resultType="User" >
         select * from account
         <where>
             <if test="user.id!=null">AND id = #{user.id}</if>

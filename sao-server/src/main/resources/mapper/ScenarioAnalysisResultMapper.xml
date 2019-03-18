@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+    id
+    economy
+    environment
+    url
+ -->
+
+<mapper namespace="org.egc.sao.dao.postgresql.ScenarioAnalysisResultDao">
+    <sql id="Base_Column_List">
+      id,result,url
+	</sql>
+
+    <select id="findAll" resultType="ScenarioAnalysisResult" parameterType="ScenarioAnalysisResult">
+        select * from scenario_analysis_result
+        <where>
+            <if test="scenarioAnalysisResult.id!=null">AND id = #{scenarioAnalysisResult.id}</if>
+            <if test="scenarioAnalysisResult.result!=null">AND result = #{scenarioAnalysisResult.result}</if>
+            <if test="scenarioAnalysisResult.url!=null">AND url = #{scenarioAnalysisResult.url}</if>
+        </where>
+    </select>
+
+    <select id="findAllUrl" resultType="ScenarioAnalysisResult">
+        select * from scenario_analysis_result
+        <where>
+            id IN
+            <foreach collection="array" item="id" index="index" open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+        </where>
+    </select>
+
+    <insert id="insert" parameterType="ScenarioAnalysisResult">
+        INSERT INTO scenario_analysis_result(
+          <include refid="Base_Column_List" />
+        )
+        VALUES (
+            #{id},
+            #{result},
+            #{url}
+        )
+    </insert>
+
+    <update id="update" parameterType="ScenarioAnalysisResult">
+        UPDATE scenario_analysis_result
+        <set>
+          <if test="result!=null">result=#{result}</if>
+          <if test="url!=null">url=#{url}</if>
+        </set>
+        WHERE id=#{id}
+    </update>
+
+</mapper>

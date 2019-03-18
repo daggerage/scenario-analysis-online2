@@ -1,6 +1,8 @@
 package org.egc.sao.util;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -20,7 +22,14 @@ public class DateUtil {
         return parseDateToString(new Date(),PATTERN_PURE);
     }
 
-
+    public static String parseStandardToPure(String standard){
+        String pure=String.valueOf(standard);
+        return pure.replaceAll("[-: ]","_");
+    }
+    public static String parseLocalDateTimeToString(LocalDateTime date,String pattern){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
+        return date.format(formatter);
+    }
     /**
      * 获得当前时间offsetMinute分钟之后的日期字符串
      * @param offsetMinute

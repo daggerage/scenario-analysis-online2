@@ -25,13 +25,20 @@ export default {
       type: String,
       default: '200px'
     },
+    resultData:{
+      type: Object,
+      default:{}
+    }
   },
   data() {
     return {
       chart: null,
-      }
+      dataSeries:[],
+      colors:['#f1c40f','#1abc9c','#3498db','#9b59b6','#e74c3c','#ecf0f1','#d35400','#7f8c8d']
+    }
   },
   mounted() {
+    this.initDataSeries()
     this.initChart()
   },
   beforeDestroy() {
@@ -44,17 +51,10 @@ export default {
   methods: {
     initChart() {
       this.chart = echarts.init(document.getElementById(this.id))
-      const xData = (function() {
-        const data = []
-        for (let i = 1; i < 13; i++) {
-          data.push(i + 'month')
-        }
-        return data
-      }())
       this.chart.setOption({
         backgroundColor: '#344b58',
         title: {
-          text: 'statistics',
+          text: '情景最终优化结果对比',
           x: '20',
           top: '20',
           textStyle: {
@@ -63,7 +63,7 @@ export default {
           },
           subtextStyle: {
             color: '#90979c',
-            fontSize: '16'
+            fontSize: '18'
           }
         },
         tooltip: {
@@ -86,15 +86,20 @@ export default {
         },
         legend: {
           x: '5%',
+          type:'scroll',
           top: '10%',
           textStyle: {
             color: '#90979c'
           },
-          data: ['female', 'male', 'average']
         },
         calculable: true,
         xAxis: [{
-          type: 'category',
+          name:'economy',
+          nameTextStyle:{
+            fontSize:16
+          },
+          nameLocation:'middle',
+          type: 'value',
           axisLine: {
             lineStyle: {
               color: '#90979c'
@@ -110,12 +115,14 @@ export default {
             show: false
           },
           axisLabel: {
-            interval: 0
-
-          },
-          data: xData
+            interval: 5
+          }
         }],
         yAxis: [{
+          name:'environment',
+          nameTextStyle:{
+            fontSize:16
+          },
           type: 'value',
           splitLine: {
             show: false
@@ -142,8 +149,6 @@ export default {
             0
           ],
           bottom: 30,
-          start: 10,
-          end: 80,
           handleIcon: 'path://M306.1,413c0,2.2-1.8,4-4,4h-59.8c-2.2,0-4-1.8-4-4V200.8c0-2.2,1.8-4,4-4h59.8c2.2,0,4,1.8,4,4V413z',
           handleSize: '110%',
           handleStyle: {
@@ -161,33 +166,41 @@ export default {
           start: 1,
           end: 35
         }],
-        series: [{
-          name: 'female',
-          type: 'bar',
-          stack: 'total',
-          barMaxWidth: 35,
-          barGap: '10%',
+        series: this.dataSeries
+      })
+    },
+    initDataSeries(){
+      let data=this.resultData
+      let keys=Object.keys(data)
+      for (let i = 0; i < keys.length; i++) {
+        let bb=[]
+        for(let item of data[keys[i]]){
+          bb.push([item['economy'],item['environment']])
+        }
+        bb.sort((a,b) => a[0]-b[0])
+        console.log(bb);
+        let item={
+          name: keys[i],
+          type: 'line',
+          symbolSize: 10,
+          symbol: 'circle',
           itemStyle: {
             normal: {
-              color: 'rgba(255,144,128,1)',
+              color: this.colors[i],
+              barBorderRadius: 0,
               label: {
                 show: true,
-                textStyle: {
-                  color: '#fff'
-                },
-                position: 'insideTop',
+                position: 'top',
                 formatter(p) {
                   return p.value > 0 ? p.value : ''
                 }
               }
             }
           },
-          data: [
-            709, 1917, 2455, 2610, 1719, 1433, 1544, 3285, 5208, 3372, 2484, 4078
-          ]
-        },
-        ]
-      })
+          data: bb
+        }
+        this.dataSeries.push(item)
+      }
     }
   }
 }

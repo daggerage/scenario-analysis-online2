@@ -1,6 +1,7 @@
 package org.egc.sao;
 
 import org.egc.sao.base.ResInfo;
+import org.egc.sao.config.PathConfig;
 import org.egc.sao.dao.mongodb.StructBMPDao;
 import org.egc.sao.domain.StructBMP;
 import org.junit.Test;
