@@ -3,7 +3,7 @@
     <el-row>
       <el-col :xs="12" :sm="12" :lg="12">
         <el-select v-model="unit" placeholder="请选择划分单元">
-          <el-option v-for="d of delineations" :key="d.value" :label="d.name" :value="d.value"/>
+          <el-option v-for="d of delineations" :key="d.value" :label="d.name" :value="d.url"/>
         </el-select>
       </el-col>
       <el-col :xs="24" :sm="18" :lg="18">
@@ -12,7 +12,7 @@
           :interactive="true"
           :emit-feature="true"
           class="overview"
-          data-url="/data/field.geojson"
+          v-bind:data-url="unit"
           @displayFeature="fillFeatureProps"/>
       </el-col>
 
@@ -46,21 +46,21 @@ export default {
     return {
       featureProps: [],
       delineations: [
-        { name: '坡位', value: 'SLOPPOS' },
-        { name: '地块', value: 'CONNFIELD' },
+        { name: '坡位', value: 'SLPPOS', url:'/data/slppos_units_merged.geojson' },
+        { name: '地块', value: 'FIELD',url:'/data/field.geojson' },
         { name: 'HRU', value: 'HRU' }
       ],
-      unit: ''
+      unit: '/data/field.geojson',
     }
   },
   methods: {
     fillFeatureProps(feature) {
+      console.log(feature)
       if (feature.values_.ObjectID === this.featureProps.ObjectID) { return }
       this.featureProps = []
       for (const key in feature.values_) {
         if (!(feature.values_[key] instanceof Object)) {
           // console.log(key + ' ' + feature.values_[key])
-
           this.featureProps.push({ key: key, value: feature.values_[key] })
         }
       }

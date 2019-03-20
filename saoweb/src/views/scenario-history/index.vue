@@ -112,11 +112,12 @@ export default {
       fetchResults(recordIds).then(res=>{
         if(res.data.status===200){
           console.log(res.data.data)
+          this.$store.records=res.data.data
           this.$router.push({
-            path:'detail',
-            query:{
-              data:res.data.data
-            }
+            path:'detail'
+            // query:{
+            //   data:res.data.data
+            // }
           })
         }
       })

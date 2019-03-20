@@ -29,12 +29,45 @@ export default {
     emitFeature: {
       type: Boolean,
       default: false
+    },
+    gene: {
+      type: Array,
+      default: null
+    }
+  },
+  data(){
+    return {
+      map:null,
+      style:null,
+      baseVectorLayer:null
     }
   },
   mounted() {
     this.initMap()
+    // this.addBaseLayer()
   },
   methods: {
+    addBaseLayer(){
+      var that=this
+      let vectorLayer = new VectorLayer({
+        source: new VectorSource({
+          url: this.dataUrl,
+          // url: this.props.dataUrl,
+          format: new GeoJSON()
+        }),
+        style: function(feature) {
+          that.style.getText().setText(feature.get('name'))
+          return that.style
+        }
+      })
+      let oldLayer = this.baseVectorLayer
+      this.baseVectorLayer = vectorLayer
+      if(oldLayer){
+        this.map.removeLayer(oldLayer)
+        console.log('removed')
+      }
+      this.map.addLayer(vectorLayer)
+    },
     initMap() {
       // 生成map
       const map = new Map({
@@ -49,7 +82,7 @@ export default {
           zoom: 14
         })
       })
-
+      this.map=map
       var style = new Style({
         fill: new Fill({
           color: 'rgba(255, 255, 255, 0.6)'
@@ -69,7 +102,7 @@ export default {
           })
         })
       })
-
+      this.style=style
       var vectorLayer = new VectorLayer({
         source: new VectorSource({
           url: this.dataUrl,
@@ -81,8 +114,21 @@ export default {
           return style
         }
       })
+      this.baseVectorLayer = vectorLayer
       map.addLayer(vectorLayer)
-
+      // map.addLayer(
+      //   new TileLayer({
+      //     visible: false,
+      //     preload: Infinity,
+      //     source: new BingMaps({
+      //       key: 'AogMY_DAdDwIYuVA5d6EAHPVGzWEuskRZoPTWTL9Hyn01qbox5jUwoHwZ8RSeJlc',
+      //       imagerySet: 'Road'
+      //       // use maxZoom 19 to see stretched tiles instead of the BingMaps
+      //       // "no photos at this zoom level" tiles
+      //       // maxZoom: 19
+      //     })
+      //   })
+      // )
       var componentProps = this
       if (componentProps.interactive) {
         var highlightHoverStyle = new Style({
@@ -188,6 +234,15 @@ export default {
           }
         })
       }
+    },
+    geneDisplay(){
+
+    }
+  },
+  watch: {
+    dataUrl:function(){
+      console.log('change')
+      this.addBaseLayer()
     }
   }
 }

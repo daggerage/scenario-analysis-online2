@@ -109,7 +109,7 @@ export default {
             show: false
           },
           axisTick: {
-            show: false
+            show: true
           },
           splitArea: {
             show: false
@@ -133,7 +133,7 @@ export default {
             }
           },
           axisTick: {
-            show: false
+            show: true
           },
           axisLabel: {
             interval: 0
@@ -153,7 +153,6 @@ export default {
           handleSize: '110%',
           handleStyle: {
             color: '#d3dee5'
-
           },
           textStyle: {
             color: '#fff' },
@@ -170,7 +169,8 @@ export default {
       })
     },
     initDataSeries(){
-      let data=this.resultData
+      // let data=this.resultData
+      let data=this.$store.records
       let keys=Object.keys(data)
       for (let i = 0; i < keys.length; i++) {
         let bb=[]
@@ -178,7 +178,6 @@ export default {
           bb.push([item['economy'],item['environment']])
         }
         bb.sort((a,b) => a[0]-b[0])
-        console.log(bb);
         let item={
           name: keys[i],
           type: 'line',

@@ -66,64 +66,65 @@ export const constantRouterMap = [
         path: 'homepage',
         component: () => import('@/views/homepage/index'),
         name: 'Homepage',
-        meta: { title: 'homepage', icon: 'home-fill', noCache: true }
+        meta: { title: '主页', icon: 'home-fill', noCache: true }
       }
     ]
   },
   {
     path: '/map-overview',
     component: Layout,
-    redirect: 'map-overview',
+    redirect: '/map-overview/index',
     children: [
       {
-        path: '',
+        path: 'index',
         component: () => import('@/views/map-overview/index'),
         name: 'MapOverview',
-        meta: { title: 'mapOverview', icon: 'location-fill', noCache: true }
+        meta: { title: '地图总览', icon: 'location-fill', noCache: true }
       }
     ]
   },
   {
     path: '/bmp-display',
     component: Layout,
-    redirect: 'bmp-display',
+    redirect: '/bmp-display/index',
     children: [
       {
-        path: '',
+        path: 'index',
         component: () => import('@/views/bmp-display/index'),
         name: 'BMPDisplay',
-        meta: { title: 'bmpDisplay', icon: 'detail-fill', noCache: true }
+        meta: { title: 'BMP展示', icon: 'detail-fill', noCache: true }
       }
     ]
   },
   {
     path: '/scenario-config',
     component: Layout,
-    redirect: 'scenario-config',
+    redirect: '/scenario-config/index',
     children: [
       {
-        path: '',
+        path: 'index',
         component: () => import('@/views/scenario-config/index'),
         name: 'ScenarioConfig',
-        meta: { title: 'scenarioConfig', icon: 'wrench-fill', noCache: true }
+        meta: { title: '情景配置', icon: 'wrench-fill', noCache: true }
       }
     ]
   },
   {
     path: '/scenario-history',
     component: Layout,
-    redirect: 'scenario-history',
+    redirect: '/scenario-history/index',
     children: [
       {
-        path: '',
+        path: 'index',
         component: () => import('@/views/scenario-history/index'),
         name: 'ScenarioHistory',
-        meta: { title: 'scenarioHistory', icon: 'folder-fill', noCache: true }
+        meta: { title: '情景分析历史', icon: 'folder-fill', noCache: true }
       },
       {
         path: 'detail',
         component: () => import('@/views/scenario-history/detail'),
         name: 'HistoryDetail',
+        meta: { title: '情景详情对比', icon: 'folder-fill', noCache: true },
         hidden: true
       }
 
@@ -201,5 +202,5 @@ export const asyncRouterMap = [
   //     }
   //   ]
   // },
-  // { path: '*', redirect: '/404', hidden: true }
+  { path: '*', redirect: '/404', hidden: true }
 ]

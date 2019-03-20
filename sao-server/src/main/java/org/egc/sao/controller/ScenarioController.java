@@ -212,12 +212,17 @@ public class ScenarioController {
     private static JSONArray getResultsFromLog(String url)throws IOException{
         Scanner  s = new Scanner(new FileInputStream(url));
         JSONArray ja=new JSONArray();
-        String line = s.nextLine();
-        if(line!=null){
-            String[] headers=line.split(":");
-            int gen=headers[1].charAt(1)-'0';
-            int pop=headers[2].charAt(1)-'0';
+        if(s.hasNext()){
+            String line = s.nextLine();
+            int i1=line.indexOf(":");
+            int i2=line.indexOf(',');
+            int i3=line.lastIndexOf(":");
+            int i4=line.lastIndexOf(' ');
+
+            int gen =Integer.valueOf(line.substring(i1+2,i2));
+            int pop =Integer.valueOf(line.substring(i3+2,i4));
             System.out.println(gen+"  "+pop);
+            s.next();
             for (int i = 0; i < gen-1; i++) {
                 for (int j = 0; j < pop+2; j++) {
                     s.nextLine();
@@ -235,6 +240,7 @@ public class ScenarioController {
                 jo.put("gene",genes);
                 ja.add(jo);
             }
+            System.out.println(ja.toArray());
         }
         return ja;
     }
