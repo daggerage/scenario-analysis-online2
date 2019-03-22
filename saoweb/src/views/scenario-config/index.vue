@@ -4,101 +4,125 @@
       <el-col :xs="24" :sm="12" :lg="8">
         <p>请进行BMP情景配置，详细说明请参考 <a href="#" style="color: #0af;">帮助</a></p>
 
-        <el-form ref="form" :rules="rules" :model="form" label-width="80px" label-position="top">
+        <el-form ref="form" :rules="rules" :model="form" label-width="80px" label-position="left">
 
-          <!--<el-form-item label="应用哪些最佳管理措施">-->
-          <!--<el-select v-model="form.bmps" multiple clearable prop="bmps" placeholder="请选择" style="width: 70%;">-->
-          <!--<el-option-group-->
-          <!--v-for="group in bmps"-->
-          <!--:key="group.label"-->
-          <!--:label="group.label">-->
-          <!--<el-option-->
-          <!--v-for="item in group.options"-->
-          <!--:key="item.value"-->
-          <!--:label="item.label"-->
-          <!--:value="item.value">-->
-          <!--</el-option>-->
-          <!--</el-option-group>-->
-          <!--</el-select>-->
-          <!--</el-form-item>-->
-
-          <el-form-item label="最佳管理措施" prop="structBmps" >
-            <el-select
-              :options="structBmps"
-              v-model="form.structBmps"
-              multiple
-              style="width: 70%;"
-              placeholder="选择结构性措施">
-              <el-option
-                v-for="bmp in structBmps"
-                :key="bmp.value"
-                :label="bmp.label"
-                :value="bmp.value">
-                <span class="bmp-label">{{ bmp.label }}</span>
-                <span class="bmp-category">{{ bmp.category }}</span>
-              </el-option>
-            </el-select>
-          </el-form-item>
-
-          <el-form-item prop="plantBmps" >
-            <el-select
-              :options="plantBmps"
-              v-model="form.plantBmps"
-              multiple
-              style="width: 70%;"
-              placeholder="选择作物管理措施">
-              <el-option
-                v-for="bmp in plantBmps"
-                :key="bmp.value"
-                :label="bmp.label"
-                :value="bmp.value">
-                <span class="bmp-label">{{ bmp.label }}</span>
-                <span class="bmp-category">{{ bmp.category }}</span>
-              </el-option>
-            </el-select>
-          </el-form-item>
-
-          <el-form-item label="单元划分方法 / 配置规则" prop="unitConf" >
-            <el-cascader
-              :options="unitConfs"
-              v-model="form.unitConf"
-              style="width: 70%;"
-            />
-            <el-tooltip
-              placement="right"
-              effect="dark">
-              <div slot="content">
-                <pre style="font-size: 14px;">{{ question.configUnitAndMethod }}</pre>
+          <el-card :body-style="mainCardBodySytle" class="box-card">
+            <div slot="header" class="clearfix">
+              <span>情景配置单</span>
+            </div>
+            <el-card :body-style="subCardBodySytle" shadow="hover" class="sub-card">
+              <div class="card-header" slot="header">
+                <span>选择最佳管理措施</span>
               </div>
-              <i class="el-icon-question" style="margin: 0 10px;"/>
-            </el-tooltip>
-          </el-form-item>
+              <el-form-item label-width="0" prop="structBmps" >
+                <el-select
+                  :options="structBmps"
+                  v-model="form.structBmps"
+                  multiple
+                  class="inner-select"
+                  placeholder="选择结构性措施">
+                  <el-option
+                    v-for="bmp in structBmps"
+                    :key="bmp.value"
+                    :label="bmp.label"
+                    :value="bmp.value">
+                    <span class="bmp-label">{{ bmp.label }}</span>
+                    <span class="bmp-category">{{ bmp.category }}</span>
+                  </el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item label-width="0" prop="plantBmps" >
+                <el-select
+                  :options="plantBmps"
+                  v-model="form.plantBmps"
+                  multiple
+                  class="inner-select"
+                  placeholder="选择作物管理措施">
+                  <el-option
+                    v-for="bmp in plantBmps"
+                    :key="bmp.value"
+                    :label="bmp.label"
+                    :value="bmp.value">
+                    <span class="bmp-label">{{ bmp.label }}</span>
+                    <span class="bmp-category">{{ bmp.category }}</span>
+                  </el-option>
+                </el-select>
+              </el-form-item>
+            </el-card>
 
-          <el-form-item label="智能优化算法" prop="algorithm">
-            <el-select v-model="form.algorithm">
-              <el-option v-for="a in algorithms" :key="a.value" :label="a.name" :value="a.value"/>
-            </el-select>
-          </el-form-item>
+            <el-card :body-style="subCardBodySytle" shadow="hover" class="sub-card">
+              <div class="card-header" slot="header">
+                <span>选择单元划分方法 / 配置规则</span>
+              </div>
+              <el-form-item label-width="0" prop="unitConf" >
+                <el-cascader
+                  :options="unitConfs"
+                  v-model="form.unitConf"
+                  style="width: 90%;"
+                />
+                <el-tooltip
+                  placement="right"
+                  effect="dark">
+                  <div slot="content">
+                    <pre style="font-size: 14px;">{{ question.configUnitAndMethod }}</pre>
+                  </div>
+                  <i class="el-icon-question" style="margin: 0 10px;"/>
+                </el-tooltip>
+              </el-form-item>
+            </el-card>
 
-          <div v-if="form.algorithm==='NSGA2'">
-            <el-form-item v-model="form.generationNum" label="优化代数">
-              <el-slider v-model="form.generationNum" show-input/>
+            <el-card :body-style="subCardBodySytle" shadow="hover" class="sub-card">
+              <div class="card-header" slot="header">
+                <span>智能优化算法</span>
+              </div>
+              <el-form-item label-width="0" prop="algorithm">
+                <el-select v-model="form.algorithm" placeholder="请选择智能优化算法">
+                  <el-option v-for="a in algorithms" :key="a.value" :label="a.name" :value="a.value"/>
+                </el-select>
+              </el-form-item>
+
+              <div v-if="form.algorithm==='NSGA2'">
+                <el-form-item v-model="form.generationNum" label="优化代数">
+                  <el-slider v-model="form.generationNum" show-input/>
+                </el-form-item>
+                <el-form-item v-model="form.populationSize" label="种群规模">
+                  <el-slider v-model="form.populationSize" :step="4" show-input/>
+                </el-form-item>
+              </div>
+            </el-card>
+
+
+            <el-card :body-style="subCardBodySytle" shadow="hover" class="sub-card">
+              <div class="card-header" slot="header">
+                <span>命名</span>
+              </div>
+              <el-form-item label="配置标题">
+                <el-input v-model="form.title" autosize type="textarea" placeholder="请输入标题" style="width: 100%;"></el-input>
+                <el-button @click="generateTitle" type="info" style="width: 50%;margin: 20px 0 0 0;float:right;">生成默认标题</el-button>
+              </el-form-item>
+            </el-card>
+
+            <el-card :body-style="subCardBodySytle" shadow="hover" class="sub-card">
+              <div class="card-header" slot="header">
+                <span>优化目标</span>
+              </div>
+              <el-form-item label="最高预算" label-width="120px">
+                <el-input-number v-model="form.maxEconomy" :min="100"></el-input-number>
+              </el-form-item>
+
+              <el-form-item label="最低环境效益" label-width="120px" style="margin: auto;">
+                <el-input-number v-model="form.minEnvironment" :min="0" :max="0.99" :precision="2" :step="0.01" ></el-input-number>
+              </el-form-item>
+            </el-card>
+
+            <el-form-item label-width="0" style="margin: auto;">
+              <el-button type="primary" @click="onSubmit('form')">提交</el-button>
             </el-form-item>
-            <el-form-item v-model="form.populationSize" label="种群规模">
-              <el-slider v-model="form.populationSize" :step="4" show-input/>
-            </el-form-item>
-          </div>
 
 
-          <el-form-item label="配置标题" v-model="title">
-            <el-input v-model="form.title" placeholder="请输入标题" style="width: 100%;"></el-input>
-            <el-button @click="generateTitle" type="info" style="width: 30%;margin: 20px 0 0 0;float:right;">生成默认标题</el-button>
-          </el-form-item>
 
+          </el-card>
 
-          <el-form-item>
-            <el-button type="primary" @click="onSubmit('form')">提交</el-button>
-          </el-form-item>
 
         </el-form>
       </el-col>
@@ -137,6 +161,8 @@ export default {
         algorithm: 'NSGA2',
         generationNum: 2,
         populationSize: 4,
+        maxEconomy:300,
+        minEnvironment:0,
         title:''
       },
       structBmps: [],
@@ -182,6 +208,13 @@ export default {
           'EXPLICITHRU  RAND, SUIT\n' +
           'CONNFIELD    RAND, SUIT, UPDOWN\n' +
           'SLPPOS       RAND, SUIT, UPDOWN, HILLSLP'
+      },
+      mainCardBodySytle:{
+        'padding':'20px',
+        'background-color':'#ffeaa7'
+      },
+      subCardBodySytle:{
+        'padding':'15px'
       }
     }
   },
@@ -207,6 +240,8 @@ export default {
               this.form.algorithm,
               this.form.generationNum,
               this.form.populationSize,
+              this.form.maxEconomy,
+              this.form.minEnvironment,
               this.form.title
             ).then(response => {
               if (response.data.status === 200) {
@@ -235,7 +270,7 @@ export default {
             const option = {
               value: bmp.id,
               label: replaceBmpName(bmp.name),
-              category: '结构性措施'
+              category: '工程性措施'
             }
             this.structBmps.push(option)
             this.form.structBmps.push(bmp.id)// default
@@ -260,7 +295,6 @@ export default {
         title+="_Gen_" + this.form.generationNum + '_' +
           "Pop_" + this.form.populationSize
       }
-
       this.form.title=title
     }
   }
@@ -275,6 +309,34 @@ export default {
     float: right;
     color: #8492a6;
     font-size: 13px;
-    margin-right: 20px;
+    margin-right:20px;
+  }
+  .box-card{
+    .clearfix{
+      text-align:center;
+      span{
+        font-size:18px;
+        font-weight: 900;
+      }
+    }
+    .clearfix:before,
+    .clearfix:after {
+      display: table;
+      content: "";
+    }
+    .clearfix:after {
+      clear: both
+    }
+    .inner-select {
+      margin-bottom: 0;
+      width:100%;
+    }
+  }
+  .sub-card{
+    margin-bottom: 20px;
+    .card-header span{
+      font-size:15px;
+      font-weight: 600;
+    }
   }
 </style>

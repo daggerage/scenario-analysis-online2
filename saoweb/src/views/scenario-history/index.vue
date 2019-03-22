@@ -115,9 +115,6 @@ export default {
           this.$store.records=res.data.data
           this.$router.push({
             path:'detail'
-            // query:{
-            //   data:res.data.data
-            // }
           })
         }
       })

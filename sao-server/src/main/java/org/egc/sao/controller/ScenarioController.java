@@ -63,11 +63,13 @@ public class ScenarioController {
     @Transactional
     public Result startAnalysis(
             @RequestParam(value = "token") String token,
-            @RequestParam(value = "structBmp",required = false) String structBMP,
-            @RequestParam(value = "plantBmp",required = false,defaultValue = "RICEPADDYCROPROTATION") String plantBMP,
+            @RequestParam(value = "structBmps",required = false) String structBMP,
+            @RequestParam(value = "plantBmps",required = false,defaultValue = "RICEPADDYCROPROTATION") String plantBMP,
             @RequestParam(value = "configUnit", required = false, defaultValue = "CONNFIELD") String configUnit,
             @RequestParam(value = "configMethod", required = false, defaultValue = "UPDOWN") String configMethod,
             @RequestParam(value = "algorithm", required = false, defaultValue = "NSGA2") String algorithm,
+            @RequestParam(value = "maxEconomy", required = false, defaultValue = "300") double maxEconomy,
+            @RequestParam(value = "minEnvironment", required = false, defaultValue = "0") double minEnvironment,
             @RequestParam(value = "generationNum", required = false, defaultValue = "2") int generationsNum,
             @RequestParam(value = "populationSize", required = false, defaultValue = "4") int populationSize,
             @RequestParam(value = "title", required = false) String title
@@ -100,10 +102,17 @@ public class ScenarioController {
 
         File templateFile = new File("data/template/scenario_analysis_template.ini");
         Wini ini = new Wini(templateFile);
-        Ini.Section sectionBMP = ini.get("BMPs");
-
         JSONObject jo;
         JSONArray ja;
+
+        Ini.Section sectionCommon = ini.get("Scenario_Common");
+        sectionCommon.put("worst_economy",String.format("%.2f",maxEconomy));
+        sectionCommon.put("worst_environment",String.format("%.2f",minEnvironment));
+
+
+        Ini.Section sectionBMP = ini.get("BMPs");
+
+
 
         //choose BMP to apply
         jo = JSON.parseObject(sectionBMP.get("BMPs_info"));

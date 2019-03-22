@@ -19,6 +19,11 @@ public class PlantBMPServiceImpl implements PlantBMPService {
     }
 
     @Override
+    public long count() {
+        return dao.count();
+    }
+
+    @Override
     public List<PlantBMP> findAll() {
         return dao.findAll();
     }

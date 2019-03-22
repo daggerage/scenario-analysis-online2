@@ -54,13 +54,12 @@ export default {
     }
   },
   methods: {
+    //将feature中的值展示在表格中
     fillFeatureProps(feature) {
-      console.log(feature)
       if (feature.values_.ObjectID === this.featureProps.ObjectID) { return }
       this.featureProps = []
       for (const key in feature.values_) {
         if (!(feature.values_[key] instanceof Object)) {
-          // console.log(key + ' ' + feature.values_[key])
           this.featureProps.push({ key: key, value: feature.values_[key] })
         }
       }

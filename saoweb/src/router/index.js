@@ -126,6 +126,13 @@ export const constantRouterMap = [
         name: 'HistoryDetail',
         meta: { title: '情景详情对比', icon: 'folder-fill', noCache: true },
         hidden: true
+      },
+      {
+        path: 'bmp-map',
+        component: () => import('@/views/scenario-history/bmpMap'),
+        name: 'bmpMap',
+        meta: { title: 'BMP情景地图展示', icon: 'folder-fill', noCache: true },
+        hidden: true
       }
 
     ]

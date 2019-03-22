@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 
-export function scenarioAnalysis(structBmp, plantBmp, configUnit, configMethod, algorithm, generationNum, populationSize, title) {
+export function scenarioAnalysis(structBmp, plantBmp, configUnit, configMethod, algorithm, generationNum, populationSize,maxEconomy, minEnvironment,title) {
   return request({
     url: 'v1/scenario/analysis',
     method: 'post',
@@ -12,6 +12,8 @@ export function scenarioAnalysis(structBmp, plantBmp, configUnit, configMethod, 
       algorithm: algorithm,
       generationNum: generationNum,
       populationSize: populationSize,
+      maxEconomy: maxEconomy,
+      minEnvironment: minEnvironment,
       title: title
     }
   })

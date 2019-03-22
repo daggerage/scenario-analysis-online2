@@ -1,5 +1,5 @@
 <template>
-  <div :class="className" :id="id" :style="{height:height,width:width}"/>
+    <div :class="className" :id="id" :style="{height:height,width:width}"/>
 </template>
 
 <script>
@@ -24,22 +24,21 @@ export default {
     height: {
       type: String,
       default: '200px'
-    },
-    resultData:{
-      type: Object,
-      default:{}
     }
   },
   data() {
     return {
       chart: null,
+      allData:{},
       dataSeries:[],
+      selected:{},
       colors:['#f1c40f','#1abc9c','#3498db','#9b59b6','#e74c3c','#ecf0f1','#d35400','#7f8c8d']
     }
   },
   mounted() {
     this.initDataSeries()
     this.initChart()
+    this.addClickEvent()
   },
   beforeDestroy() {
     if (!this.chart) {
@@ -50,6 +49,7 @@ export default {
   },
   methods: {
     initChart() {
+      var that = this
       this.chart = echarts.init(document.getElementById(this.id))
       this.chart.setOption({
         backgroundColor: '#344b58',
@@ -67,10 +67,36 @@ export default {
           }
         },
         tooltip: {
-          trigger: 'axis',
+          trigger: 'item',
           axisPointer: {
             textStyle: {
               color: '#fff'
+            }
+          }
+        },
+        toolbox: {
+          itemSize:40,
+          itemGap:30,
+          right:50,
+          top:5,
+          feature: {
+            mySelected: {
+              show: true,
+              title: '查看已选择的点',
+              icon: 'image://static/chart.png',
+              onclick: that.displaySelected
+            },
+            myBmp: {
+              show: true,
+              title: '查看选中点的情景配置',
+              icon: 'image://static/loupe.png',
+              onclick: that.displayBmp
+            },
+            myCancle:{
+              show: true,
+              title: '取消所有选中',
+              icon: 'image://static/cancel.png',
+              onclick: that.cancelSelected
             }
           }
         },
@@ -168,17 +194,18 @@ export default {
         series: this.dataSeries
       })
     },
-    initDataSeries(){
-      // let data=this.resultData
-      let data=this.$store.records
-      let keys=Object.keys(data)
+    initDataSeries() {
+      var that = this
+      let data = this.$store.records
+      this.allData=data
+      let keys = Object.keys(data)
       for (let i = 0; i < keys.length; i++) {
-        let bb=[]
-        for(let item of data[keys[i]]){
-          bb.push([item['economy'],item['environment']])
+        let bb = []
+        for (let item of data[keys[i]]) {
+          bb.push([item['economy'], item['environment']])
         }
-        bb.sort((a,b) => a[0]-b[0])
-        let item={
+        bb.sort((a, b) => a[0] - b[0])
+        let item = {
           name: keys[i],
           type: 'line',
           symbolSize: 10,
@@ -194,12 +221,107 @@ export default {
                   return p.value > 0 ? p.value : ''
                 }
               }
+            },
+            emphasis: {
+              borderColor: '#000000',
+              borderWidth: 4
             }
           },
-          data: bb
+          data: bb,
         }
         this.dataSeries.push(item)
       }
+    },
+    addClickEvent(){
+      var that=this
+      var data=this.$store.records
+      this.chart.on('click',function(params){
+        if(!that.selected[params.seriesName]){
+          that.selected[params.seriesName]={}
+        }
+        if(that.selected[params.seriesName][params.dataIndex]){
+          delete that.selected[params.seriesName][params.dataIndex]
+          that.chart.dispatchAction({
+            type: 'downplay',
+            seriesIndex: params.seriesIndex,
+            dataIndex:params.dataIndex
+          })
+          that.$message({
+            message:'已取消选择: '+params.seriesName+' - '+'第 '+params.dataIndex+' 个点',
+            type:'warning'
+          })
+        }else{
+          that.selected[params.seriesName][params.dataIndex]={}
+          that.selected[params.seriesName][params.dataIndex]['gene']=data[params.seriesName][params.dataIndex]['gene']
+          that.chart.dispatchAction({
+            type: 'highlight',
+            seriesIndex: params.seriesIndex,
+            dataIndex:params.dataIndex
+          })
+          that.$message({
+            message:'已选择: '+params.seriesName+' - '+'第 '+params.dataIndex+' 个点',
+            type:'success',
+            duration:5000
+          })
+        }
+        console.log(Object.keys(that.selected).length)
+      })
+
+      document.oncontextmenu = function () {
+        return false;
+      };
+      this.chart.on('contextmenu', function (params) {
+        console.log(params);
+        that.chart.dispatchAction({
+          type: 'downplay',
+          seriesIndex: params.seriesIndex,
+          dataIndex:params.dataIndex
+        })
+      })
+    },
+    displaySelected(){
+      var that=this
+      for(let seriesName of Object.keys(that.selected)){
+        for(let index of Object.keys(that.selected[seriesName])){
+          that.chart.dispatchAction({
+            type: 'highlight',
+            seriesName: seriesName,
+            dataIndex:index
+          })
+          setTimeout(function () {
+            that.chart.dispatchAction({
+              type: 'downplay',
+              seriesName: seriesName,
+              dataIndex:index
+            })
+          },100)
+          setTimeout(function () {
+            that.chart.dispatchAction({
+              type: 'highlight',
+              seriesName: seriesName,
+              dataIndex:index
+            })
+          },200)
+        }
+      }
+    },
+    cancelSelected(){
+      var that=this
+      for (let i = 0; i < Object.keys(that.selected).length; i++) {
+        let seriesName=Object.keys(that.selected)[i]
+        let series = that.selected[seriesName]
+        that.chart.dispatchAction({
+          type: 'downplay',
+          seriesName: seriesName,
+        })
+        delete that.selected[seriesName]
+      }
+    },
+    displayBmp(){
+      this.$store.selected=this.selected
+      this.$router.push({
+        path:'bmp-map'
+      })
     }
   }
 }

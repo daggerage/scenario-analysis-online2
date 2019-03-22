@@ -1,7 +1,14 @@
 <template>
   <div>
     <div id="map"/>
-  </div>
+
+    <div v-if="gene">
+      <div v-for="item of bmps" :key="item.id" class="legend-box">
+        <div class="legend-color"/>
+        <div class="legend-label">{{replaceBmpName(item.name)}}</div>
+      </div>
+    </div>
+    </div>
 
 </template>
 
@@ -14,6 +21,9 @@ import GeoJSON from 'ol/format/GeoJSON'
 import VectorLayer from 'ol/layer/Vector'
 import VectorSource from 'ol/source/Vector'
 import { Fill, Stroke, Style, Text } from 'ol/style'
+import {fetchStructBMPs,fetchPlantBMPs} from "@/api/bmp";
+import {replaceBmpName} from '@/utils/bmpDisplay'
+
 
 export default {
   name: 'MapOverview0',
@@ -38,52 +48,7 @@ export default {
   data(){
     return {
       map:null,
-      style:null,
-      baseVectorLayer:null
-    }
-  },
-  mounted() {
-    this.initMap()
-    // this.addBaseLayer()
-  },
-  methods: {
-    addBaseLayer(){
-      var that=this
-      let vectorLayer = new VectorLayer({
-        source: new VectorSource({
-          url: this.dataUrl,
-          // url: this.props.dataUrl,
-          format: new GeoJSON()
-        }),
-        style: function(feature) {
-          that.style.getText().setText(feature.get('name'))
-          return that.style
-        }
-      })
-      let oldLayer = this.baseVectorLayer
-      this.baseVectorLayer = vectorLayer
-      if(oldLayer){
-        this.map.removeLayer(oldLayer)
-        console.log('removed')
-      }
-      this.map.addLayer(vectorLayer)
-    },
-    initMap() {
-      // 生成map
-      const map = new Map({
-        target: 'map',
-        layers: [
-          new TileLayer({
-            source: new OSM()
-          })
-        ],
-        view: new View({
-          center: [12964346.628866788, 2959662.83938],
-          zoom: 14
-        })
-      })
-      this.map=map
-      var style = new Style({
+      style:new Style({
         fill: new Fill({
           color: 'rgba(255, 255, 255, 0.6)'
         }),
@@ -101,17 +66,75 @@ export default {
             width: 3
           })
         })
-      })
-      this.style=style
-      var vectorLayer = new VectorLayer({
+      }),
+      baseVectorLayer:null,
+      bmpStylesMap:{},
+      bmps:[],
+      colors:[
+        'rgba(255, 195, 18,1.0)',
+        'rgba(196, 229, 56,1.0)',
+        'rgba(18, 203, 196,1.0)',
+        'rgba(253, 167, 223,1.0)',
+        'rgba(237, 76, 103,1.0)',
+        'rgba(234, 32, 39,1.0)',
+        'rgba(0, 98, 102,1.0)',
+        'rgba(27, 20, 100,1.0)',
+        'rgba(87, 88, 187,1.0)',
+        'rgba(111, 30, 81,1.0)'
+      ]
+    }
+  },
+  mounted() {
+    this.initColoredFeatures()
+    this.initMap()
+  },
+  methods: {
+    addBaseLayer(){
+      var that=this
+      let vectorLayer = new VectorLayer({
         source: new VectorSource({
           url: this.dataUrl,
-          // url: this.props.dataUrl,
           format: new GeoJSON()
         }),
         style: function(feature) {
-          style.getText().setText(feature.get('name'))
-          return style
+          if(that.gene){
+            return that.bmpStylesMap[parseInt(that.gene[feature.values_.gridcode])]
+
+          }else {
+            return that.style
+          }
+        }
+      })
+      let oldLayer = this.baseVectorLayer
+      this.baseVectorLayer = vectorLayer
+      if(oldLayer){
+        this.map.removeLayer(oldLayer)
+      }
+      this.map.addLayer(vectorLayer)
+    },
+    initMap() {
+      var that=this
+      // 生成map
+      const map = new Map({
+        target: 'map',
+        layers: [
+          new TileLayer({
+            source: new OSM()
+          })
+        ],
+        view: new View({
+          center: [12964346.628866788, 2959662.83938],
+          zoom: 14
+        })
+      })
+      this.map=map
+      var vectorLayer = new VectorLayer({
+        source: new VectorSource({
+          url: this.dataUrl,
+          format: new GeoJSON()
+        }),
+        style: function(feature) {
+          return that.style
         }
       })
       this.baseVectorLayer = vectorLayer
@@ -209,7 +232,6 @@ export default {
           }
         }
 
-        var that = this
         var emitFeature = function(feature) {
           that.$emit('displayFeature', feature)
         }
@@ -235,14 +257,48 @@ export default {
         })
       }
     },
-    geneDisplay(){
-
-    }
+    initColoredFeatures(){
+      var that=this
+      var colors = 0
+      var structBmpNum=0
+      fetchStructBMPs().then(res=>{
+        if(res.data.status===200){
+          colors+=res.data.data.length
+          structBmpNum+=colors
+          for(let bmp of res.data.data){
+            that.bmps.push({id:bmp['subscenario'],name:bmp['name']})
+          }
+          that.bmps.push({id:colors+1,name:'RICEPADDYCROPROTATION'})
+          colors+=1
+          that.bmpStylesMap[0]=that.style
+          for (let i = 0; i < colors; i++) {
+            that.bmpStylesMap[i + 1] = new Style({
+              fill: new Fill({
+                color: that.colors[i]
+              })
+            })
+          }
+        }
+      })
+    },
+    replaceBmpName
   },
   watch: {
-    dataUrl:function(){
-      console.log('change')
+    geneAndUrl(newUrl,oldUrl){
+      var that=this
       this.addBaseLayer()
+      for (let i = 0; i <this.bmps.length; i++) {
+        var x=document.getElementsByClassName('legend-color')[i]
+        console.log(that.colors[i]);
+        x.style.backgroundColor=that.colors[i]
+      }
+
+    },
+    deep:true
+  },
+  computed:{
+    geneAndUrl:function () {
+      return [this.gene,this.dataUrl]
     }
   }
 }
@@ -252,5 +308,22 @@ export default {
   #map {
     width: 100%;
     height: 100%;
+  }
+  .legend-box{
+    margin: 20px 20px 0 0;
+    /*width:150px;*/
+    height: 30px;
+    position:relative;
+    float:left;
+  }
+  .legend-color{
+    width: 30px;
+    height: 20px;
+    border-radius:5px;
+    float:left;
+  }
+  .legend-label{
+    float:left;
+    margin-left: 5px;
   }
 </style>

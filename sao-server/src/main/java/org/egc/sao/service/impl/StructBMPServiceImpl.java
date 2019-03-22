@@ -17,6 +17,11 @@ public class StructBMPServiceImpl implements StructBMPService {
     public StructBMPServiceImpl(StructBMPDao dao){this.dao=dao;}
 
     @Override
+    public long count() {
+        return dao.count();
+    }
+
+    @Override
     public List<StructBMP> findAll(){return dao.findAll();}
 
     @Override

@@ -27,7 +27,12 @@ public class BMPController {
     }
 
     @RequestMapping(value = "struct",method = RequestMethod.GET)
-    public Result listAllStructBMP(){
+    public Result listAllStructBMP(
+            @RequestParam(required = false,defaultValue = "false") boolean countOnly
+    ){
+        if(countOnly){
+            return new Result<>(ResInfo.SUCCESS,sbs.count());
+        }
         List<StructBMP> bmps= sbs.findAll();
         if (bmps.size()==0){
             return new Result<>(ResInfo.NOT_FOUND,null);
@@ -56,7 +61,12 @@ public class BMPController {
     }
 
     @RequestMapping(value = "plant",method = RequestMethod.GET)
-    public Result listAllPlantBMP(){
+    public Result listAllPlantBMP(
+            @RequestParam(required = false,defaultValue = "false") boolean countOnly
+    ){
+        if(countOnly){
+            return new Result<>(ResInfo.SUCCESS,pbs.count());
+        }
         List<PlantBMP> bmps= pbs.findAll();
         if (bmps.size()==0){
             return new Result<>(ResInfo.NOT_FOUND,null);

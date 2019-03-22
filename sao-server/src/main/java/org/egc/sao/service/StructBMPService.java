@@ -5,6 +5,8 @@ import org.egc.sao.domain.StructBMP;
 import java.util.List;
 
 public interface StructBMPService {
+    long count();
+
     List<StructBMP> findAll();
 
     List<StructBMP> findAllBySubscenario(int subscenario);
