@@ -28,8 +28,6 @@ public class CmdTaskService {
 
     /**
      * 异步执行情景分析脚本，并将结果转储在指定路径
-     * 此命令不支持并发执行，以互相免覆盖本地存储结果
-     * TODO: 后期修改seims框架使其结果能保存在指定路径
      * @param storagePath 最终存储的路径，如 data/scenario/user-id@UserName/date_time
      * @param scenarioAnalysisResultId 情景分析记录的id
      */
@@ -41,7 +39,7 @@ public class CmdTaskService {
         String storageResultDirPath=PathConfig.PROJECT_PATH+PathConfig.SEP +storagePath+"\\result";
         System.out.println(storageResultDirPath);
         File storageResultDir = new File(storageResultDirPath);
-        storageResultDir.mkdir();
+        storageResultDir.mkdirs();
         CommandLine cmdLine = CommandLine.parse(line);
 
         DefaultExecutor executor = new DefaultExecutor();

@@ -30,7 +30,7 @@ export default {
   props: {
     dataUrl: {
       type: String,
-      default: '/data/field.geojson'
+      default: ''
     },
     interactive: {
       type: Boolean,
@@ -97,8 +97,11 @@ export default {
           format: new GeoJSON()
         }),
         style: function(feature) {
-          if(that.gene){
-            return that.bmpStylesMap[parseInt(that.gene[feature.values_.gridcode])]
+          if(that.gene[feature.values_['gridcode'] || feature.values_['SLPPOS_UNI']]){
+            // console.log(that.gene[feature.values_['gridcode'] || feature.values_['SLPPOS_UNI']])
+            console.log('style:'+that.bmpStylesMap[that.gene[feature.values_['gridcode'] || feature.values_['SLPPOS_UNI']]]);
+            // return that.bmpStylesMap[parseInt(that.gene[feature.values_['gridcode']||feature.values_['SLPPOS_UNI']])]
+            return that.bmpStylesMap[parseInt(that.gene[feature.values_['gridcode']||feature.values_['SLPPOS_UNI']])]
 
           }else {
             return that.style

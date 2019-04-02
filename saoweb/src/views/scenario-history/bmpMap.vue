@@ -32,7 +32,7 @@
         activeNames:['1'],
         unitUrlMap:{
           CONNFIELD:'data/field_merged.geojson',
-          SLPPOS:'data/slppos_units_merged.geojson'
+          SLPPOS:'data/slppos_merged_out.geojson'
         }
       }
     },
@@ -46,6 +46,7 @@
       selectedUnit:function(){
         var that=this
         if(this.selectedSeriesName) {
+          //切割标题获取配置单元名称。。。
           console.log(that.unitUrlMap[that.selectedSeriesName.split('_')[1]])
           return that.unitUrlMap[that.selectedSeriesName.split('_')[1]]
         }
@@ -53,7 +54,7 @@
       selectedGene:function(){
         if(this.selectedSeriesName&&this.series[this.selectedSeriesName]) {
           console.log(this.series[this.selectedSeriesName][this.selectedDataIndex])
-          return this.series[this.selectedSeriesName][this.selectedDataIndex]['gene']
+          return this.series[this.selectedSeriesName][this.selectedDataIndex]['pairs']
         }
       }
     },

@@ -105,9 +105,9 @@ public class ScenarioController {
         JSONObject jo;
         JSONArray ja;
 
-        Ini.Section sectionCommon = ini.get("Scenario_Common");
-        sectionCommon.put("worst_economy",String.format("%.2f",maxEconomy));
-        sectionCommon.put("worst_environment",String.format("%.2f",minEnvironment));
+//        Ini.Section sectionCommon = ini.get("Scenario_Common");
+//        sectionCommon.put("worst_economy",String.format("%.2f",maxEconomy));
+//        sectionCommon.put("worst_environment",String.format("%.2f",minEnvironment));
 
 
         Ini.Section sectionBMP = ini.get("BMPs");
@@ -134,6 +134,8 @@ public class ScenarioController {
             Ini.Section sectionAlgorithm = ini.get("NSGA2");
             sectionAlgorithm.put("GenerationsNum", generationsNum);
             sectionAlgorithm.put("PopulationSize",populationSize);
+            sectionAlgorithm.put("EconomyThreshold",maxEconomy);
+            sectionAlgorithm.put("EnvironmentThreshold",minEnvironment);
         }
 
         UUID resultId = UUID.randomUUID();
@@ -164,7 +166,6 @@ public class ScenarioController {
         if (writeIniToFile(ini, user.getId(), user.getName(), pureTimestamp)) {
             cts.AnalysisCmd(
                     storageUrl,
-                    //String.format("SA_%s_%s_%s_Gen_%d_Pop_%d", algorithm, configUnit, configMethod, generationsNum, populationSize),
                     resultId
             );
             return new Result<>(ResInfo.SUCCESS, structBMP);
@@ -213,43 +214,65 @@ public class ScenarioController {
         JSONObject jo=new JSONObject();
         for (ScenarioAnalysisResult r:results){
             String title=srs.findAll(new ScenarioRecord().setScenarioAnalysisResultId(r.getId())).get(0).getTitle();
-            jo.put(title,getResultsFromLog(r.getUrl()+"\\runtime.log"));
+            jo.put(title,getResultsFromLog(r.getUrl()));
         }
         return new Result<>(ResInfo.SUCCESS,jo);
     }
 
     private static JSONArray getResultsFromLog(String url)throws IOException{
-        Scanner  s = new Scanner(new FileInputStream(url));
         JSONArray ja=new JSONArray();
-        if(s.hasNext()){
-            String line = s.nextLine();
-            int i1=line.indexOf(":");
-            int i2=line.indexOf(',');
-            int i3=line.lastIndexOf(":");
-            int i4=line.lastIndexOf(' ');
+        try (Scanner s = new Scanner(new FileInputStream(url+"\\runtime.log"))) {
+            if (s.hasNext()) {
+                String line = s.nextLine();
+                int i1 = line.indexOf(":");
+                int i2 = line.indexOf(',');
+                int i3 = line.lastIndexOf(":");
+                int i4 = line.lastIndexOf(' ');
 
-            int gen =Integer.valueOf(line.substring(i1+2,i2));
-            int pop =Integer.valueOf(line.substring(i3+2,i4));
-            System.out.println(gen+"  "+pop);
-            s.next();
-            for (int i = 0; i < gen-1; i++) {
-                for (int j = 0; j < pop+2; j++) {
-                    s.nextLine();
+                int gen = Integer.valueOf(line.substring(i1 + 2, i2));
+                int pop = Integer.valueOf(line.substring(i3 + 2, i4));
+                System.out.println(gen + "  " + pop);
+                s.next();
+                for (int i = 0; i < gen - 1; i++) {
+                    for (int j = 0; j < pop + 2; j++) {
+                        s.nextLine();
+                    }
+                }
+                s.nextLine();
+                s.nextLine();
+                for (int i = 0; i < pop; i++) {
+                    line = s.nextLine();
+                    String[] values = line.split("[\\t\\s]");
+                    String[] genes = line.split("[\\[\\]]")[1].split(", ");
+                    JSONObject jo = new JSONObject();
+                    jo.put("scenario",values[1]);
+                    jo.put("economy", values[2]);
+                    jo.put("environment", values[3]);
+//                    jo.put("gene", genes);
+                    ja.add(jo);
                 }
             }
-            s.nextLine();
-            s.nextLine();
-            for (int i = 0; i < pop; i++) {
-                line=s.nextLine();
-                String[] values=line.split("[\\t\\s]");
-                String[] genes = line.split("[\\[\\]]")[1].split(", ");
-                JSONObject jo=new JSONObject();
-                jo.put("economy",values[2]);
-                jo.put("environment",values[3]);
-                jo.put("gene",genes);
-                ja.add(jo);
-            }
-            System.out.println(ja.toArray());
+            //TODO: remove these ugly codes
+            for (Object o : ja){
+                JSONObject jo= (JSONObject)o;
+                String scenario=jo.getString("scenario");
+                try(Scanner s1 = new Scanner(new FileInputStream(url+"\\Scenarios\\Scenario_"+scenario+".txt"))) {
+                    s1.nextLine();
+                    s1.nextLine();
+                    s1.nextLine();
+                    s1.nextLine();
+                    s1.nextLine();
+                    JSONObject pairs=new JSONObject();
+                    for (int i = 1; i < 5; i++) {
+                        String line=s1.nextLine().split("[\\t\\s]")[4];
+                        for(String key:line.split("-")){
+                            pairs.put(key,i);
+                        }
+                    }
+                    jo.put("pairs",pairs);
+                }
+
+                    }
         }
         return ja;
     }

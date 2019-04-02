@@ -207,7 +207,7 @@ export default {
         bb.sort((a, b) => a[0] - b[0])
         let item = {
           name: keys[i],
-          type: 'line',
+          type: 'scatter',
           symbolSize: 10,
           symbol: 'circle',
           itemStyle: {
@@ -252,7 +252,8 @@ export default {
           })
         }else{
           that.selected[params.seriesName][params.dataIndex]={}
-          that.selected[params.seriesName][params.dataIndex]['gene']=data[params.seriesName][params.dataIndex]['gene']
+          that.selected[params.seriesName][params.dataIndex]['pairs']=data[params.seriesName][params.dataIndex]['pairs']
+          // that.selected[params.seriesName][params.dataIndex]['gene']=data[params.seriesName][params.dataIndex]['gene']
           that.chart.dispatchAction({
             type: 'highlight',
             seriesIndex: params.seriesIndex,
@@ -264,14 +265,12 @@ export default {
             duration:5000
           })
         }
-        console.log(Object.keys(that.selected).length)
       })
 
       document.oncontextmenu = function () {
         return false;
       };
       this.chart.on('contextmenu', function (params) {
-        console.log(params);
         that.chart.dispatchAction({
           type: 'downplay',
           seriesIndex: params.seriesIndex,

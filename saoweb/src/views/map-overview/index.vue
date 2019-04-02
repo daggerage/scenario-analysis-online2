@@ -46,17 +46,18 @@ export default {
     return {
       featureProps: [],
       delineations: [
-        { name: '坡位', value: 'SLPPOS', url:'/data/slppos_units_merged.geojson' },
-        { name: '地块', value: 'FIELD',url:'/data/field.geojson' },
+        { name: '坡位', value: 'SLPPOS', url:'/data/slppos_merged_out.geojson' },
+        { name: '地块', value: 'FIELD',url:'/data/field_15_merged.geojson' },
         { name: 'HRU', value: 'HRU' }
       ],
-      unit: '/data/field.geojson',
+      unit: '/data/field_15_merged.geojson',
     }
   },
   methods: {
     //将feature中的值展示在表格中
     fillFeatureProps(feature) {
-      if (feature.values_.ObjectID === this.featureProps.ObjectID) { return }
+      if (!feature) { return }
+      // if (!feature || feature.values_['Id'] === this.featureProps['Id']) { return }
       this.featureProps = []
       for (const key in feature.values_) {
         if (!(feature.values_[key] instanceof Object)) {

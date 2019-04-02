@@ -38,7 +38,7 @@ export default {
       })
       const first = matched[0]
       if (first && first.name.trim().toLocaleLowerCase() !== 'Homepage'.toLocaleLowerCase()) {
-        matched = [{ path: '/homepage', meta: { title: 'homepage' }}].concat(matched)
+        matched = [{ path: '/homepage', meta: { title: '主页' }}].concat(matched)
       }
       this.levelList = matched
     },
