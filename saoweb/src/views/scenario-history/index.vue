@@ -111,7 +111,6 @@ export default {
       let recordIds = this.multipleSelection.map((item) => item.scenarioAnalysisResultId)
       fetchResults(recordIds).then(res=>{
         if(res.data.status===200){
-          console.log(res.data.data)
           this.$store.records=res.data.data
           this.$router.push({
             path:'detail'

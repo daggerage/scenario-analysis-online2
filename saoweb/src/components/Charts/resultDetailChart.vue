@@ -5,6 +5,8 @@
 <script>
 import echarts from 'echarts'
 import resize from './mixins/resize'
+import Selected from '@/store/entity/selected'
+
 
 export default {
   mixins: [resize],
@@ -29,7 +31,6 @@ export default {
   data() {
     return {
       chart: null,
-      allData:{},
       dataSeries:[],
       selected:{},
       colors:['#f1c40f','#1abc9c','#3498db','#9b59b6','#e74c3c','#ecf0f1','#d35400','#7f8c8d']
@@ -67,8 +68,9 @@ export default {
           }
         },
         tooltip: {
-          trigger: 'item',
+          trigger: 'axis',
           axisPointer: {
+            type:'cross',
             textStyle: {
               color: '#fff'
             }
@@ -112,17 +114,19 @@ export default {
         },
         legend: {
           x: '5%',
-          type:'scroll',
+          // type:'scroll',
           top: '10%',
           textStyle: {
-            color: '#90979c'
+            fontSize:15,
+            color: '#fff'
           },
         },
         calculable: true,
         xAxis: [{
           name:'economy',
           nameTextStyle:{
-            fontSize:16
+            fontSize:16,
+            padding:[5,0,0,0]
           },
           nameLocation:'middle',
           type: 'value',
@@ -132,7 +136,10 @@ export default {
             }
           },
           splitLine: {
-            show: false
+            show: true,
+            lineStyle:{
+              type:'dashed'
+            }
           },
           axisTick: {
             show: true
@@ -146,12 +153,17 @@ export default {
         }],
         yAxis: [{
           name:'environment',
+          nameLocation:'end',
           nameTextStyle:{
-            fontSize:16
+            fontSize:16,
+            padding:[0,0,0,50]
           },
           type: 'value',
           splitLine: {
-            show: false
+            show: true,
+            lineStyle:{
+              type:'dashed'
+            }
           },
           axisLine: {
             lineStyle: {
@@ -197,16 +209,19 @@ export default {
     initDataSeries() {
       var that = this
       let data = this.$store.records
-      this.allData=data
-      let keys = Object.keys(data)
-      for (let i = 0; i < keys.length; i++) {
+
+      for (let i = 0; i < Object.keys(data).length; i++) {
+        let result=data[i]
         let bb = []
-        for (let item of data[keys[i]]) {
-          bb.push([item['economy'], item['environment']])
+        for (let dataIndex in result['pops']) {
+          let point = result['pops'][dataIndex]
+          bb.push({
+            value:[point['economy'], point['environment']],
+            scenario:point['scenario']
+          })
         }
-        bb.sort((a, b) => a[0] - b[0])
         let item = {
-          name: keys[i],
+          name: result.title,
           type: 'scatter',
           symbolSize: 10,
           symbol: 'circle',
@@ -223,7 +238,7 @@ export default {
               }
             },
             emphasis: {
-              borderColor: '#000000',
+              borderColor: '#000',
               borderWidth: 4
             }
           },
@@ -233,72 +248,71 @@ export default {
       }
     },
     addClickEvent(){
+      //TODO: 说什么好。。这段太糟心
       var that=this
       var data=this.$store.records
+      that.$store.selected=new Selected()
+      console.log(that.$store.selected)
       this.chart.on('click',function(params){
-        if(!that.selected[params.seriesName]){
-          that.selected[params.seriesName]={}
-        }
-        if(that.selected[params.seriesName][params.dataIndex]){
-          delete that.selected[params.seriesName][params.dataIndex]
-          that.chart.dispatchAction({
-            type: 'downplay',
-            seriesIndex: params.seriesIndex,
-            dataIndex:params.dataIndex
-          })
-          that.$message({
-            message:'已取消选择: '+params.seriesName+' - '+'第 '+params.dataIndex+' 个点',
-            type:'warning'
-          })
-        }else{
-          that.selected[params.seriesName][params.dataIndex]={}
-          that.selected[params.seriesName][params.dataIndex]['pairs']=data[params.seriesName][params.dataIndex]['pairs']
-          // that.selected[params.seriesName][params.dataIndex]['gene']=data[params.seriesName][params.dataIndex]['gene']
+        var si=params.seriesIndex
+        var di=params.dataIndex
+        if(that.$store.selected.clickPoint(si,di)){
           that.chart.dispatchAction({
             type: 'highlight',
-            seriesIndex: params.seriesIndex,
-            dataIndex:params.dataIndex
+            seriesIndex: si,
+            dataIndex:di
           })
           that.$message({
-            message:'已选择: '+params.seriesName+' - '+'第 '+params.dataIndex+' 个点',
+            message:'已选择: '+data[si].title+' - '+'第 '+(di+1)+' 个点',
             type:'success',
             duration:5000
           })
+        }else{
+          that.chart.dispatchAction({
+            type: 'downplay',
+            seriesIndex: si,
+            dataIndex:di
+          })
+          that.$message({
+            message:'已取消选择: '+data[si].title+' - '+'第 '+(di+1)+' 个点',
+            type:'warning'
+          })
         }
+        console.log(that.$store.selected)
       })
 
-      document.oncontextmenu = function () {
-        return false;
-      };
-      this.chart.on('contextmenu', function (params) {
-        that.chart.dispatchAction({
-          type: 'downplay',
-          seriesIndex: params.seriesIndex,
-          dataIndex:params.dataIndex
-        })
-      })
+      // document.oncontextmenu = function () {
+      //   return false;
+      // };
+      // this.chart.on('contextmenu', function (params) {
+      //   that.chart.dispatchAction({
+      //     type: 'downplay',
+      //     seriesIndex: params.seriesIndex,
+      //     dataIndex: params.dataIndex
+      //   })
+      // })
     },
     displaySelected(){
       var that=this
-      for(let seriesName of Object.keys(that.selected)){
-        for(let index of Object.keys(that.selected[seriesName])){
+      for(let seriesIndex of Object.keys(that.selected)){
+        for(let pointIndex of Object.keys(that.selected[seriesIndex]['pops'])){
           that.chart.dispatchAction({
             type: 'highlight',
-            seriesName: seriesName,
-            dataIndex:index
+            seriesIndex: seriesIndex,
+            dataIndex:pointIndex
           })
           setTimeout(function () {
             that.chart.dispatchAction({
               type: 'downplay',
-              seriesName: seriesName,
-              dataIndex:index
+              seriesIndex: seriesIndex,
+              dataIndex:pointIndex
             })
           },100)
           setTimeout(function () {
             that.chart.dispatchAction({
               type: 'highlight',
-              seriesName: seriesName,
-              dataIndex:index
+              seriesIndex: seriesIndex,
+              dataIndex:pointIndex
             })
           },200)
         }
@@ -317,7 +331,6 @@ export default {
       }
     },
     displayBmp(){
-      this.$store.selected=this.selected
       this.$router.push({
         path:'bmp-map'
       })

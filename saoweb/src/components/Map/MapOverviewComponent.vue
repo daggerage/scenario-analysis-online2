@@ -97,7 +97,7 @@ export default {
           format: new GeoJSON()
         }),
         style: function(feature) {
-          if(that.gene[feature.values_['gridcode'] || feature.values_['SLPPOS_UNI']]){
+          if(that.gene && (that.gene[feature.values_['gridcode'] || feature.values_['SLPPOS_UNI']])){
             // console.log(that.gene[feature.values_['gridcode'] || feature.values_['SLPPOS_UNI']])
             console.log('style:'+that.bmpStylesMap[that.gene[feature.values_['gridcode'] || feature.values_['SLPPOS_UNI']]]);
             // return that.bmpStylesMap[parseInt(that.gene[feature.values_['gridcode']||feature.values_['SLPPOS_UNI']])]
@@ -292,6 +292,9 @@ export default {
       this.addBaseLayer()
       for (let i = 0; i <this.bmps.length; i++) {
         var x=document.getElementsByClassName('legend-color')[i]
+        if(!x){
+          continue
+        }
         console.log(that.colors[i]);
         x.style.backgroundColor=that.colors[i]
       }

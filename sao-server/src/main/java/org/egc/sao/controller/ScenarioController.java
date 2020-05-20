@@ -17,12 +17,19 @@ import org.egc.sao.util.DateUtil;
 import org.ini4j.Ini;
 import org.ini4j.Wini;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.*;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @RestController
 @RequestMapping("api/v1/scenario")
@@ -186,6 +193,8 @@ public class ScenarioController {
         List<ScenarioRecord> records = srs.findAll(new ScenarioRecord().setAccountId(user.getId()));
         return new Result<>(ResInfo.SUCCESS,records);
     }
+
+    //TODO: 修改记录标题
     @RequestMapping(value = "put",method = RequestMethod.GET)
     public Result updateRecordTitle(
             @RequestParam(value = "token") String token,
@@ -212,15 +221,96 @@ public class ScenarioController {
         String[] resultIdArr=resultIds.split(",");
         List<ScenarioAnalysisResult> results = sars.findAllUrl(resultIdArr);
         JSONObject jo=new JSONObject();
-        for (ScenarioAnalysisResult r:results){
+        for (int i = 0; i < results.size(); i++) {
+            ScenarioAnalysisResult r = results.get(i);
             String title=srs.findAll(new ScenarioRecord().setScenarioAnalysisResultId(r.getId())).get(0).getTitle();
-            jo.put(title,getResultsFromLog(r.getUrl()));
+            JSONObject jojo=new JSONObject();
+            jojo.put("id",r.getId());
+            jojo.put("title",title);
+            jojo.put("pops",getResultsFromLog(r.getUrl()));
+            jo.put(String.valueOf(i),jojo);
         }
         return new Result<>(ResInfo.SUCCESS,jo);
     }
 
-    private static JSONArray getResultsFromLog(String url)throws IOException{
-        JSONArray ja=new JSONArray();
+    @RequestMapping(value = "file",method = RequestMethod.GET)
+//    public ResponseEntity<Resource> downloadScenarioFile(
+    public Result downloadScenarioFile(
+            @RequestParam(value = "token") String token,
+            @RequestParam(value = "resultId") String resultId,
+            @RequestParam(value = "scenarioId") String scenarioId
+    )throws IOException{
+        if(!AuthUtil.isJwtValide(token)){
+//            return ResponseEntity.badRequest()
+//                    .header("no auth","no auth!")
+//                    .body(null);
+            return new Result<>(ResInfo.AUTH_FAIL, null);
+        }
+        ScenarioAnalysisResult result=sars.findAllUrl(new String[]{resultId}).get(0);
+        String url=result.getUrl();
+        return new Result<>(ResInfo.SUCCESS,url);
+
+//        File zip=null;
+//        InputStreamResource resource =null;
+//        String zipFilePath=String.format("%s\\Scenarios\\Scenario_%s.zip",url,scenarioId);
+//        File zipFile=new File(zipFilePath);
+//        if(zipFile.exists()){
+//            zipFile.delete();
+//            return ResponseEntity.badRequest()
+//                    .header("exists","exists!!")
+//                    .body(null);
+//        }else if(!zipFile.createNewFile()){
+//            return ResponseEntity.badRequest()
+//                    .header("cr","cr!!")
+//                    .body(null);
+//        }
+//
+//        File txtFile=new File(String.format("%s\\Scenarios\\Scenario_%s.txt",url,scenarioId));
+//        File tifFile=new File(String.format("%s\\Scenarios\\Scenario_%s.tif",url,scenarioId));
+//        try(
+//                FileInputStream txtFis=new FileInputStream(txtFile);
+//                FileInputStream tifFis=new FileInputStream(tifFile);
+//                ZipOutputStream zos=new ZipOutputStream(new FileOutputStream(zipFile));
+//                ){
+//            byte[] buf=new byte[4096];
+//            zos.putNextEntry(new ZipEntry(txtFile.getName()));
+//            int len=0;
+//            while ((len=txtFis.read(buf))!=-1){
+//                zos.write(buf,0,len);
+//            }
+//            zos.closeEntry();
+//            txtFis.close();
+//
+//            zos.putNextEntry(new ZipEntry(tifFile.getName()));
+//            len=0;
+//            while ((len=tifFis.read(buf))!=-1){
+//                zos.write(buf,0,len);
+//            }
+//            zos.closeEntry();
+//            zos.finish();
+//            zos.close();
+//            zip=new File(zipFilePath);
+//            resource = new InputStreamResource(new FileInputStream(zip));
+//            HttpHeaders headers = new HttpHeaders();
+//            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=ojbk.zip");
+//            headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
+//            headers.add("Pragma", "no-cache");
+//            headers.add("Expires", "0");
+//            return ResponseEntity.ok()
+//                    .headers(headers)
+//                    .contentLength(zip.length())
+//                    .contentType(MediaType.parseMediaType("application/octet-stream"))
+//                    .body(resource);
+//
+//        }finally {
+//            //TODO: not working?
+//            zipFile.delete();
+//        }
+
+    }
+
+    private static JSONObject getResultsFromLog(String url)throws IOException{
+        JSONObject jo=new JSONObject();
         try (Scanner s = new Scanner(new FileInputStream(url+"\\runtime.log"))) {
             if (s.hasNext()) {
                 String line = s.nextLine();
@@ -240,22 +330,34 @@ public class ScenarioController {
                 }
                 s.nextLine();
                 s.nextLine();
+                ArrayList<JSONObject> jojos=new ArrayList<>();
                 for (int i = 0; i < pop; i++) {
                     line = s.nextLine();
                     String[] values = line.split("[\\t\\s]");
-                    String[] genes = line.split("[\\[\\]]")[1].split(", ");
-                    JSONObject jo = new JSONObject();
-                    jo.put("scenario",values[1]);
-                    jo.put("economy", values[2]);
-                    jo.put("environment", values[3]);
-//                    jo.put("gene", genes);
-                    ja.add(jo);
+
+                    JSONObject jojo = new JSONObject();
+                    jojo.put("scenario", values[1]);
+                    jojo.put("economy", values[2]);
+                    jojo.put("environment", values[3]);
+                    jojos.add(jojo);
+                    //先把上面的排序，然后再统一加下面的序号
                 }
+                jojos.sort((a,b)->{
+                    double av=Double.valueOf((String)a.get("economy"));
+                    double bv=Double.valueOf((String)b.get("economy"));
+                    return (int)(av-bv);
+                });
+                for (int i = 0; i < jojos.size(); i++) {
+                    jo.put(String.valueOf(i),jojos.get(i));
+                    System.out.println(jojos.get(i).get("economy"));
+                }
+
             }
             //TODO: remove these ugly codes
-            for (Object o : ja){
-                JSONObject jo= (JSONObject)o;
-                String scenario=jo.getString("scenario");
+
+            for (String k : jo.keySet()){
+                JSONObject jojo= (JSONObject)jo.get(k);
+                String scenario=jojo.getString("scenario");
                 try(Scanner s1 = new Scanner(new FileInputStream(url+"\\Scenarios\\Scenario_"+scenario+".txt"))) {
                     s1.nextLine();
                     s1.nextLine();
@@ -269,12 +371,11 @@ public class ScenarioController {
                             pairs.put(key,i);
                         }
                     }
-                    jo.put("pairs",pairs);
+                    jojo.put("pairs",pairs);
                 }
-
-                    }
+            }
         }
-        return ja;
+        return jo;
     }
 
     private static HashMap<String,String> UNIT_MAP = new HashMap<String,String>(){

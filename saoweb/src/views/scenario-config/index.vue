@@ -34,7 +34,41 @@
             <div class="card-header" slot="header">
               <span>选择最佳管理措施</span>
             </div>
-            <el-form-item label="工程性措施" label-width="120px" prop="structBmps">
+            <!--<el-form-item label="工程性措施" label-width="120px" prop="structBmps">-->
+              <!--<el-select-->
+                <!--:options="structBmps"-->
+                <!--v-model="form.structBmps"-->
+                <!--multiple-->
+                <!--class="inner-select"-->
+                <!--placeholder="选择工程性措施">-->
+                <!--<el-option-->
+                  <!--v-for="bmp in structBmps"-->
+                  <!--:key="bmp.value"-->
+                  <!--:label="bmp.label"-->
+                  <!--:value="bmp.value">-->
+                  <!--<span class="bmp-label">{{ bmp.label }}</span>-->
+                  <!--<span class="bmp-category">{{ bmp.category }}</span>-->
+                <!--</el-option>-->
+              <!--</el-select>-->
+            <!--</el-form-item>-->
+            <!--<el-form-item label="非工程性措施" label-width="120px" prop="plantBmps">-->
+              <!--<el-select-->
+                <!--:options="plantBmps"-->
+                <!--v-model="form.plantBmps"-->
+                <!--multiple-->
+                <!--class="inner-select"-->
+                <!--placeholder="选择作物管理措施">-->
+                <!--<el-option-->
+                  <!--v-for="bmp in plantBmps"-->
+                  <!--:key="bmp.value"-->
+                  <!--:label="bmp.label"-->
+                  <!--:value="bmp.value">-->
+                  <!--<span class="bmp-label">{{ bmp.label }}</span>-->
+                  <!--<span class="bmp-category">{{ bmp.category }}</span>-->
+                <!--</el-option>-->
+              <!--</el-select>-->
+            <!--</el-form-item>-->
+            <el-form-item label-width="0" prop="structBmps">
               <el-select
                 :options="structBmps"
                 v-model="form.structBmps"
@@ -45,24 +79,8 @@
                   v-for="bmp in structBmps"
                   :key="bmp.value"
                   :label="bmp.label"
-                  :value="bmp.value">
-                  <span class="bmp-label">{{ bmp.label }}</span>
-                  <span class="bmp-category">{{ bmp.category }}</span>
-                </el-option>
-              </el-select>
-            </el-form-item>
-            <el-form-item label="非工程性措施" label-width="120px" prop="plantBmps">
-              <el-select
-                :options="plantBmps"
-                v-model="form.plantBmps"
-                multiple
-                class="inner-select"
-                placeholder="选择作物管理措施">
-                <el-option
-                  v-for="bmp in plantBmps"
-                  :key="bmp.value"
-                  :label="bmp.label"
-                  :value="bmp.value">
+                  :value="bmp.value"
+                  :disabled="bmp.disabled">
                   <span class="bmp-label">{{ bmp.label }}</span>
                   <span class="bmp-category">{{ bmp.category }}</span>
                 </el-option>
@@ -160,10 +178,10 @@
   import {replaceBmpName} from '@/utils/bmpDisplay'
 
   const configMethods = {
-    RAND: {value: 'RAND', label: 'Random'},
-    SUIT: {value: 'SUIT', label: 'Suit'},
-    UPDOWN: {value: 'UPDOWN', label: 'Up-Down'},
-    HILLSLP: {value: 'HILLSLP', label: 'Hillslope'}
+    RAND: {value: 'RAND', label: '随机配置策略'},
+    SUIT: {value: 'SUIT', label: '适宜配置策略'},
+    UPDOWN: {value: 'UPDOWN', label: '上下游配置策略'},
+    HILLSLP: {value: 'HILLSLP', label: '坡面配置策略'}
   }
   export default {
     name: 'Scenario',
@@ -171,7 +189,7 @@
     data() {
       return {
         form: {
-          structBmps: [],
+          structBmps: ['RICEPADDYCROPROTATION'],
           plantBmps: ['RICEPADDYCROPROTATION'],
           unitConf: ['CONNFIELD', 'UPDOWN'],
           algorithm: 'NSGA2',
@@ -181,34 +199,28 @@
           minEnvironment: 0,
           title: ''
         },
-        structBmps: [],
+        structBmps: [{value: 'RICEPADDYCROPROTATION', label: '稻麦轮作', disabled:true}],
         plantBmps: [{value: 'RICEPADDYCROPROTATION', label: '稻麦轮作', category: '作物管理措施'}],
         delineations: [
           {name: '坡位', value: 'SLOPPOS'},
           {name: '地块', value: 'CONNFIELD'},
-          {name: 'HRU', value: 'HRU'}
-        ],
-        confRules: [
-          {name: 'Random', value: 'RAND'},
-          {name: 'Suit', value: 'SUIT'},
-          {name: 'Up-Down', value: 'UPDOWN'},
-          {name: 'HillSlope', value: 'HILLSLP'}
+          {name: '水文响应单元', value: 'HRU'}
         ],
         unitConfs: [{
           value: 'HRU',
-          label: 'HRU',
+          label: '水文响应单元',
           children: [configMethods.RAND, configMethods.SUIT]
         }, {
           value: 'CONNFIELD',
-          label: 'Connected Field',
+          label: '具有上下游关系的地块',
           children: [configMethods.RAND, configMethods.SUIT, configMethods.UPDOWN]
         }, {
           value: 'SLPPOS',
-          label: 'Slope Position',
+          label: '坡位',
           children: [configMethods.RAND, configMethods.SUIT, configMethods.UPDOWN, configMethods.HILLSLP]
         }],
         algorithms: [
-          {name: 'None', value: 'NONE'},
+          {name: '不使用优化算法', value: 'NONE'},
           {name: 'NSGA2', value: 'NSGA2'}
         ],
         rules: {
@@ -292,7 +304,7 @@
               const option = {
                 value: bmp.id,
                 label: replaceBmpName(bmp.name),
-                category: '工程性措施'
+                // category: '工程性措施'
               }
               this.structBmps.push(option)
               this.form.structBmps.push(bmp.id)// default
@@ -301,14 +313,6 @@
         })
       },
       replaceBmpName,
-      selectAll() {
-        for (const item of this.structBmps) {
-          this.form.structBmps.push(item.value)
-        }
-        this.form.plantBmps.push(this.plantBmps[0])
-        this.form.unitConf.push('HRU')
-        this.form.unitConf.push('SUIT')
-      },
       generateTitle() {
         let title = this.form.algorithm + '_' +
           this.form.unitConf[0] + '_' +

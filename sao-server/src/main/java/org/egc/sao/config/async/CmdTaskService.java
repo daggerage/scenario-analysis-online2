@@ -1,7 +1,6 @@
 package org.egc.sao.config.async;
 
 import org.apache.commons.exec.CommandLine;
-import org.apache.commons.exec.DefaultExecuteResultHandler;
 import org.apache.commons.exec.DefaultExecutor;
 import org.egc.sao.config.PathConfig;
 import org.egc.sao.dao.postgresql.ScenarioAnalysisResultDao;
@@ -12,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.UUID;
 
 @Service

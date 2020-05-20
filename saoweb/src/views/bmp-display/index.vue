@@ -4,13 +4,13 @@
       <el-col span="24">
         <el-tabs class="bmp-tab-first">
 
-          <el-tab-pane label="结构化措施">
+          <el-tab-pane label="工程性措施">
             <struct-bmp-table
               :data="structBMPData"
               bmp-type="struct"/>
           </el-tab-pane>
 
-          <el-tab-pane label="非结构化措施">
+          <el-tab-pane label="作物管理措施">
             <el-tag>植物管理措施</el-tag>
             <plant-bmp-table
               :data="plantBMPData"

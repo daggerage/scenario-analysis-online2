@@ -32,6 +32,16 @@ export function fetchResults(resultIds) {
   return request({
     url: 'v1/scenario/result',
     method: 'get',
-    params: { resultIds : idStr }
+    params: { resultIds: idStr }
+  })
+}
+export function fetchMapFile(resultId, scenarioId) {
+  return request({
+    url: 'v1/scenario/file',
+    method: 'get',
+    params: {
+      resultId: resultId,
+      scenarioId: scenarioId
+    }
   })
 }
