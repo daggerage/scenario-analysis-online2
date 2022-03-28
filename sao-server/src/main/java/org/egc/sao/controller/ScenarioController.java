@@ -151,7 +151,7 @@ public class ScenarioController {
         String storageUrl = "data\\scenario\\" + user.getId() + "@" + user.getName() + "\\" + pureTimestamp;
         String resultUrl = storageUrl + "\\result";
 
-        ini.get("SEIMS_Model").put("OUT_DIR", PathConfig.PROJECT_PATH + PathConfig.SEP + resultUrl);
+        ini.get("SEIMS_Model").put("SA_OUT_DIR", PathConfig.PROJECT_PATH + PathConfig.SEP + resultUrl);
 
         sars.insert(
                 new ScenarioAnalysisResult()
