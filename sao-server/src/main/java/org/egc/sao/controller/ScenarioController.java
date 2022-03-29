@@ -335,7 +335,7 @@ public class ScenarioController {
 
                 int gen = Integer.valueOf(line.substring(i1 + 2, i2));
                 int pop = Integer.valueOf(line.substring(i3 + 2, i4));
-                System.out.println(gen + "  " + pop);
+                LOGGER.debug(gen + "  " + pop);
                 s.next();
                 for (int i = 0; i < gen - 1; i++) {
                     for (int j = 0; j < pop + 2; j++) {
@@ -363,7 +363,7 @@ public class ScenarioController {
                 });
                 for (int i = 0; i < jojos.size(); i++) {
                     jo.put(String.valueOf(i), jojos.get(i));
-                    System.out.println(jojos.get(i).get("economy"));
+                    LOGGER.debug(jojos.get(i).get("economy").toString());
                 }
 
             }

@@ -3,8 +3,11 @@ package org.egc.sao.config.async;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.egc.sao.config.PathConfig;
+import org.egc.sao.controller.ScenarioController;
 import org.egc.sao.dao.postgresql.ScenarioAnalysisResultDao;
 import org.egc.sao.domain.ScenarioAnalysisResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -15,6 +18,7 @@ import java.util.UUID;
 
 @Service
 public class CmdTaskService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ScenarioController.class);
     private final ScenarioAnalysisResultDao sard;
 
     @Autowired
@@ -30,10 +34,10 @@ public class CmdTaskService {
     @Async
     public void AnalysisCmd(String storagePath, UUID scenarioAnalysisResultId) throws IOException {
         String line = "python "+ PathConfig.ANALYSIS_SCRIPT_PATH +" -ini "+PathConfig.PROJECT_PATH+PathConfig.SEP+storagePath+PathConfig.SEP+"user_sa.ini";
-        System.out.println(line);
+        LOGGER.info(line);
 
         String storageResultDirPath=PathConfig.PROJECT_PATH+PathConfig.SEP +storagePath+PathConfig.SEP+"result";
-        System.out.println(storageResultDirPath);
+        LOGGER.info("Result stored to "+storageResultDirPath);
         File storageResultDir = new File(storageResultDirPath);
         storageResultDir.mkdirs();
         CommandLine cmdLine = CommandLine.parse(line);
