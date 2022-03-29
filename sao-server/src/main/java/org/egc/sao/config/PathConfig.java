@@ -5,12 +5,41 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class PathConfig {
-    @Value("${path.result-path}")
-    public String resultPath;
 
-    @Value("${path.analysis-script-path}")
-    public String analysisResultPath;
+    @Value("${path.seims-root}")
+    public static String SEIMS;
 
-    public static String PROJECT_PATH=System.getProperty("user.dir");
-    public static String SEP="\\";
+    public static String MODEL_PATH;
+    public static String ANALYSIS_SCRIPT_PATH;
+//    public static String SEP= File.separator;
+    public static String SEP= "/";
+    public static String PROJECT_PATH=System.getProperty("user.dir").replace("\\",PathConfig.SEP);
+
+
+    @Value("${path.seims-root}")
+    public void setSEIMS(String seims) {
+        SEIMS = getSepReplaced(seims);
+    }
+
+    private static String getSepReplaced(String path){
+        return path.replace("/",PathConfig.SEP);
+    }
+
+    @Value("${path.seims-root}")
+    public void setModelPath(String seims){
+        MODEL_PATH = String.format("%s%sdata%syouwuzhen%sdemo_youwuzhen30m_longterm_model",
+                getSepReplaced(seims),
+                PathConfig.SEP,
+                PathConfig.SEP,
+                PathConfig.SEP);
+    }
+    @Value("${path.seims-root}")
+    public void setAnalysisScriptPath(String seims){
+        ANALYSIS_SCRIPT_PATH = String.format("%s%sseims%sscenario_analysis%sspatialunits%smain_nsga2.py",
+                getSepReplaced(seims),
+                PathConfig.SEP,
+                PathConfig.SEP,
+                PathConfig.SEP,
+                PathConfig.SEP);
+    }
 }

@@ -16,12 +16,10 @@ import java.util.UUID;
 @Service
 public class CmdTaskService {
     private final ScenarioAnalysisResultDao sard;
-    private final PathConfig pathConfig;
 
     @Autowired
-    public CmdTaskService(ScenarioAnalysisResultDao sard,PathConfig pathConfig) {
+    public CmdTaskService(ScenarioAnalysisResultDao sard) {
         this.sard = sard;
-        this.pathConfig=pathConfig;
     }
 
     /**
@@ -30,11 +28,11 @@ public class CmdTaskService {
      * @param scenarioAnalysisResultId 情景分析记录的id
      */
     @Async
-    public void AnalysisCmd(String storagePath, UUID scenarioAnalysisResultId) throws IOException,InterruptedException {
-        String line = "python "+ pathConfig.analysisResultPath +" -ini "+PathConfig.PROJECT_PATH+PathConfig.SEP+storagePath+PathConfig.SEP+"user_sa.ini";
+    public void AnalysisCmd(String storagePath, UUID scenarioAnalysisResultId) throws IOException {
+        String line = "python "+ PathConfig.ANALYSIS_SCRIPT_PATH +" -ini "+PathConfig.PROJECT_PATH+PathConfig.SEP+storagePath+PathConfig.SEP+"user_sa.ini";
         System.out.println(line);
 
-        String storageResultDirPath=PathConfig.PROJECT_PATH+PathConfig.SEP +storagePath+"\\result";
+        String storageResultDirPath=PathConfig.PROJECT_PATH+PathConfig.SEP +storagePath+PathConfig.SEP+"result";
         System.out.println(storageResultDirPath);
         File storageResultDir = new File(storageResultDirPath);
         storageResultDir.mkdirs();

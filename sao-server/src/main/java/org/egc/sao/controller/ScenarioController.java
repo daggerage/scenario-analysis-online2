@@ -3,6 +3,9 @@ package org.egc.sao.controller;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.configuration2.INIConfiguration;
+import org.apache.commons.configuration2.SubnodeConfiguration;
+import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.egc.sao.config.PathConfig;
 import org.egc.sao.config.async.CmdTaskService;
 import org.egc.sao.domain.ScenarioAnalysisResult;
@@ -14,14 +17,9 @@ import org.egc.sao.domain.User;
 import org.egc.sao.service.*;
 import org.egc.sao.util.AuthUtil;
 import org.egc.sao.util.DateUtil;
-import org.ini4j.Ini;
-import org.ini4j.Wini;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,7 +33,7 @@ import java.util.zip.ZipOutputStream;
 @RequestMapping("api/v1/scenario")
 @CrossOrigin(origins = "http://localhost:7099", maxAge = 3600)
 public class ScenarioController {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(ScenarioController.class);
     private final UserService us;
     private final StructBMPService sbs;
     private final PlantBMPService pbs;
@@ -56,22 +54,22 @@ public class ScenarioController {
             CmdTaskService cts,
             PathConfig pathConfig
     ) {
-        this.us=us;
+        this.us = us;
         this.sbs = sbs;
         this.pbs = pbs;
         this.sms = sms;
         this.srs = srs;
         this.sars = sars;
-        this.cts=cts;
-        this.pathConfig=pathConfig;
+        this.cts = cts;
+        this.pathConfig = pathConfig;
     }
 
-    @RequestMapping(value = "analysis",method = RequestMethod.POST)
+    @RequestMapping(value = "analysis", method = RequestMethod.POST)
     @Transactional
     public Result startAnalysis(
             @RequestParam(value = "token") String token,
-            @RequestParam(value = "structBmps",required = false) String structBMP,
-            @RequestParam(value = "plantBmps",required = false,defaultValue = "RICEPADDYCROPROTATION") String plantBMP,
+            @RequestParam(value = "structBmps", required = false) String structBMP,
+            @RequestParam(value = "plantBmps", required = false, defaultValue = "RICEPADDYCROPROTATION") String plantBMP,
             @RequestParam(value = "configUnit", required = false, defaultValue = "CONNFIELD") String configUnit,
             @RequestParam(value = "configMethod", required = false, defaultValue = "UPDOWN") String configMethod,
             @RequestParam(value = "algorithm", required = false, defaultValue = "NSGA2") String algorithm,
@@ -80,7 +78,7 @@ public class ScenarioController {
             @RequestParam(value = "generationNum", required = false, defaultValue = "2") int generationsNum,
             @RequestParam(value = "populationSize", required = false, defaultValue = "4") int populationSize,
             @RequestParam(value = "title", required = false) String title
-    )throws IOException, InterruptedException {
+    ) throws IOException, InterruptedException {
         if (!AuthUtil.isJwtValide(token)) {
             return new Result<>(ResInfo.AUTH_FAIL, token);
         }
@@ -107,8 +105,14 @@ public class ScenarioController {
             }
         }
 
-        File templateFile = new File("data/template/scenario_analysis_template.ini");
-        Wini ini = new Wini(templateFile);
+        File templateFile = new File(String.format("data%stemplate%sscenario_analysis_template.ini", PathConfig.SEP, PathConfig.SEP));
+        INIConfiguration ini = new INIConfiguration();
+        try {
+            ini.read(new InputStreamReader(new FileInputStream(templateFile)));
+        } catch (ConfigurationException e) {
+            LOGGER.error(e.getMessage(), e);
+            return new Result<>(ResInfo.INTERNAL_ERROR, null);
+        }
         JSONObject jo;
         JSONArray ja;
 
@@ -116,42 +120,45 @@ public class ScenarioController {
 //        sectionCommon.put("worst_economy",String.format("%.2f",maxEconomy));
 //        sectionCommon.put("worst_environment",String.format("%.2f",minEnvironment));
 
-
-        Ini.Section sectionBMP = ini.get("BMPs");
-
-
+        SubnodeConfiguration sectionBMP = ini.getSection("BMPs");
 
         //choose BMP to apply
-        jo = JSON.parseObject(sectionBMP.get("BMPs_info"));
+        jo = JSON.parseObject(sectionBMP.getString("BMPs_info"));
         ja = jo.getJSONObject("17").getJSONArray("SUBSCENARIO");
         ja.clear();
         ja.addAll(structBMPSubscenarioes);
-        sectionBMP.put("BMPs_info", jo);
+        sectionBMP.setProperty("BMPs_info", jo);
 
         //choose configuration unit
-        sectionBMP.put("BMPs_cfg_units", UNIT_MAP.get(configUnit));
+        sectionBMP.setProperty("BMPs_cfg_units", UNIT_MAP.get(configUnit));
 
         //choose configuration method
-        sectionBMP.put("BMPs_cfg_method", configMethod);
+        sectionBMP.setProperty("BMPs_cfg_method", configMethod);
 
         //TODO: choose optimization algorithm
         if (algorithm.equals("NONE")) {
-            ini.remove("NSGA2");
+            ini.clearProperty("NSGA2");
         } else {
-            Ini.Section sectionAlgorithm = ini.get("NSGA2");
-            sectionAlgorithm.put("GenerationsNum", generationsNum);
-            sectionAlgorithm.put("PopulationSize",populationSize);
-            sectionAlgorithm.put("EconomyThreshold",maxEconomy);
-            sectionAlgorithm.put("EnvironmentThreshold",minEnvironment);
+            SubnodeConfiguration sectionAlgorithm = ini.getSection("NSGA2");
+            sectionAlgorithm.setProperty("GenerationsNum", generationsNum);
+            sectionAlgorithm.setProperty("PopulationSize", populationSize);
+            sectionAlgorithm.setProperty("EconomyThreshold", maxEconomy);
+            sectionAlgorithm.setProperty("EnvironmentThreshold", minEnvironment);
         }
 
         UUID resultId = UUID.randomUUID();
         LocalDateTime date = LocalDateTime.now();
         String pureTimestamp = DateUtil.parseLocalDateTimeToString(date, DateUtil.PATTERN_PURE);
-        String storageUrl = "data\\scenario\\" + user.getId() + "@" + user.getName() + "\\" + pureTimestamp;
-        String resultUrl = storageUrl + "\\result";
+        String storageUrl = String.format("data%sscenario%s%s@%s%s%s",
+                PathConfig.SEP, PathConfig.SEP, user.getId(), user.getName(), PathConfig.SEP, pureTimestamp);
+        String resultUrl = storageUrl + PathConfig.SEP + "result";
 
-        ini.get("SEIMS_Model").put("SA_OUT_DIR", PathConfig.PROJECT_PATH + PathConfig.SEP + resultUrl);
+        //add MODEL_DIR, BIN_DIR and SA_OUT_DIR
+        SubnodeConfiguration sectionSEIMS = ini.getSection("SEIMS_Model");
+        sectionSEIMS.addProperty("MODEL_DIR", PathConfig.MODEL_PATH);
+        sectionSEIMS.addProperty("BIN_DIR", PathConfig.SEIMS + PathConfig.SEP + "bin");
+        sectionSEIMS.addProperty("SA_OUT_DIR", PathConfig.PROJECT_PATH + PathConfig.SEP + resultUrl);
+
 
         sars.insert(
                 new ScenarioAnalysisResult()
@@ -170,85 +177,92 @@ public class ScenarioController {
                         .setTitle(title)
         );
 
-        if (writeIniToFile(ini, user.getId(), user.getName(), pureTimestamp)) {
+        boolean isWriteSuccess = false;
+        try {
+            isWriteSuccess = writeIniToFile(ini, user.getId(), user.getName(), pureTimestamp);
+        } catch (ConfigurationException e) {
+            LOGGER.error(e.getMessage(), e);
+            return new Result<>(ResInfo.INTERNAL_ERROR, "write SEIMS ini file failed!");
+        }
+        if (isWriteSuccess) {
             cts.AnalysisCmd(
                     storageUrl,
                     resultId
             );
             return new Result<>(ResInfo.SUCCESS, structBMP);
         } else {
-            return new Result<>(ResInfo.INTERNAL_ERROR, null);
+            return new Result<>(ResInfo.INTERNAL_ERROR, "executing async SEIMS task failed");
         }
     }
 
-    @RequestMapping(value = "record",method = RequestMethod.GET)
+    @RequestMapping(value = "record", method = RequestMethod.GET)
     public Result listAllAnalysisRecord(
             @RequestParam(value = "token") String token
-    ){
-        if(!AuthUtil.isJwtValide(token)){
-            return new Result<>(ResInfo.AUTH_FAIL,null);
-        }
-        User user=us.findUser(new User().setId(UUID.fromString(token)));
-
-        List<ScenarioRecord> records = srs.findAll(new ScenarioRecord().setAccountId(user.getId()));
-        return new Result<>(ResInfo.SUCCESS,records);
-    }
-
-    //TODO: 修改记录标题
-    @RequestMapping(value = "put",method = RequestMethod.GET)
-    public Result updateRecordTitle(
-            @RequestParam(value = "token") String token,
-            @RequestParam(value="recordId") String recordId,
-            @RequestParam(value="title") String title
     ) {
         if (!AuthUtil.isJwtValide(token)) {
             return new Result<>(ResInfo.AUTH_FAIL, null);
         }
-        ScenarioRecord sr=srs.findAll(new ScenarioRecord().setId(UUID.fromString(recordId))).get(0);
+        User user = us.findUser(new User().setId(UUID.fromString(token)));
+
+        List<ScenarioRecord> records = srs.findAll(new ScenarioRecord().setAccountId(user.getId()));
+        return new Result<>(ResInfo.SUCCESS, records);
+    }
+
+    //TODO: 修改记录标题
+    @RequestMapping(value = "put", method = RequestMethod.GET)
+    public Result updateRecordTitle(
+            @RequestParam(value = "token") String token,
+            @RequestParam(value = "recordId") String recordId,
+            @RequestParam(value = "title") String title
+    ) {
+        if (!AuthUtil.isJwtValide(token)) {
+            return new Result<>(ResInfo.AUTH_FAIL, null);
+        }
+        ScenarioRecord sr = srs.findAll(new ScenarioRecord().setId(UUID.fromString(recordId))).get(0);
         sr.setTitle(title);
         List<ScenarioRecord> records = srs.findAll(sr);
         return new Result<>(ResInfo.SUCCESS, title);
     }
 
-    @RequestMapping(value = "result",method = RequestMethod.GET)
+    @RequestMapping(value = "result", method = RequestMethod.GET)
     public Result listAnalysisRecordDetail(
             @RequestParam(value = "token") String token,
             @RequestParam(value = "resultIds") String resultIds
-    )throws IOException{
-        if(!AuthUtil.isJwtValide(token)){
-            return new Result<>(ResInfo.AUTH_FAIL,null);
+    ) throws IOException {
+        if (!AuthUtil.isJwtValide(token)) {
+            return new Result<>(ResInfo.AUTH_FAIL, null);
         }
-        String[] resultIdArr=resultIds.split(",");
+        String[] resultIdArr = resultIds.split(",");
         List<ScenarioAnalysisResult> results = sars.findAllUrl(resultIdArr);
-        JSONObject jo=new JSONObject();
+        JSONObject jo = new JSONObject();
         for (int i = 0; i < results.size(); i++) {
             ScenarioAnalysisResult r = results.get(i);
-            String title=srs.findAll(new ScenarioRecord().setScenarioAnalysisResultId(r.getId())).get(0).getTitle();
-            JSONObject jojo=new JSONObject();
-            jojo.put("id",r.getId());
-            jojo.put("title",title);
-            jojo.put("pops",getResultsFromLog(r.getUrl()));
-            jo.put(String.valueOf(i),jojo);
+            String title = srs.findAll(new ScenarioRecord().setScenarioAnalysisResultId(r.getId())).get(0).getTitle();
+            JSONObject jojo = new JSONObject();
+            jojo.put("id", r.getId());
+            jojo.put("title", title);
+            jojo.put("pops", getResultsFromLog(r.getUrl()));
+            jo.put(String.valueOf(i), jojo);
         }
-        return new Result<>(ResInfo.SUCCESS,jo);
+        return new Result<>(ResInfo.SUCCESS, jo);
     }
 
-    @RequestMapping(value = "file",method = RequestMethod.GET)
+    @RequestMapping(value = "file", method = RequestMethod.GET)
 //    public ResponseEntity<Resource> downloadScenarioFile(
     public Result downloadScenarioFile(
             @RequestParam(value = "token") String token,
             @RequestParam(value = "resultId") String resultId,
             @RequestParam(value = "scenarioId") String scenarioId
-    )throws IOException{
-        if(!AuthUtil.isJwtValide(token)){
+    ) throws IOException {
+        if (!AuthUtil.isJwtValide(token)) {
 //            return ResponseEntity.badRequest()
 //                    .header("no auth","no auth!")
 //                    .body(null);
             return new Result<>(ResInfo.AUTH_FAIL, null);
         }
-        ScenarioAnalysisResult result=sars.findAllUrl(new String[]{resultId}).get(0);
-        String url=result.getUrl();
-        return new Result<>(ResInfo.SUCCESS,url);
+        ScenarioAnalysisResult result = sars.findAllUrl(new String[]{resultId}).get(0);
+        String url = result.getUrl();
+        return new Result<>(ResInfo.SUCCESS, url);
 
 //        File zip=null;
 //        InputStreamResource resource =null;
@@ -309,9 +323,9 @@ public class ScenarioController {
 
     }
 
-    private static JSONObject getResultsFromLog(String url)throws IOException{
-        JSONObject jo=new JSONObject();
-        try (Scanner s = new Scanner(new FileInputStream(url+"\\runtime.log"))) {
+    private static JSONObject getResultsFromLog(String url) throws IOException {
+        JSONObject jo = new JSONObject();
+        try (Scanner s = new Scanner(new FileInputStream(url + PathConfig.SEP + "runtime.log"))) {
             if (s.hasNext()) {
                 String line = s.nextLine();
                 int i1 = line.indexOf(":");
@@ -330,7 +344,7 @@ public class ScenarioController {
                 }
                 s.nextLine();
                 s.nextLine();
-                ArrayList<JSONObject> jojos=new ArrayList<>();
+                ArrayList<JSONObject> jojos = new ArrayList<>();
                 for (int i = 0; i < pop; i++) {
                     line = s.nextLine();
                     String[] values = line.split("[\\t\\s]");
@@ -342,63 +356,67 @@ public class ScenarioController {
                     jojos.add(jojo);
                     //先把上面的排序，然后再统一加下面的序号
                 }
-                jojos.sort((a,b)->{
-                    double av=Double.valueOf((String)a.get("economy"));
-                    double bv=Double.valueOf((String)b.get("economy"));
-                    return (int)(av-bv);
+                jojos.sort((a, b) -> {
+                    double av = Double.valueOf((String) a.get("economy"));
+                    double bv = Double.valueOf((String) b.get("economy"));
+                    return (int) (av - bv);
                 });
                 for (int i = 0; i < jojos.size(); i++) {
-                    jo.put(String.valueOf(i),jojos.get(i));
+                    jo.put(String.valueOf(i), jojos.get(i));
                     System.out.println(jojos.get(i).get("economy"));
                 }
 
             }
             //TODO: remove these ugly codes
 
-            for (String k : jo.keySet()){
-                JSONObject jojo= (JSONObject)jo.get(k);
-                String scenario=jojo.getString("scenario");
-                try(Scanner s1 = new Scanner(new FileInputStream(url+"\\Scenarios\\Scenario_"+scenario+".txt"))) {
+            for (String k : jo.keySet()) {
+                JSONObject jojo = (JSONObject) jo.get(k);
+                String scenario = jojo.getString("scenario");
+                try (Scanner s1 = new Scanner(new FileInputStream(
+                        String.format("%s%sScenarios%sScenario_%s.txt", url, PathConfig.SEP, PathConfig.SEP, scenario)))
+                ) {
                     s1.nextLine();
                     s1.nextLine();
                     s1.nextLine();
                     s1.nextLine();
                     s1.nextLine();
-                    JSONObject pairs=new JSONObject();
+                    JSONObject pairs = new JSONObject();
                     for (int i = 1; i < 5; i++) {
-                        String line=s1.nextLine().split("[\\t\\s]")[4];
-                        for(String key:line.split("-")){
-                            pairs.put(key,i);
+                        String line = s1.nextLine().split("[\\t\\s]")[4];
+                        for (String key : line.split("-")) {
+                            pairs.put(key, i);
                         }
                     }
-                    jojo.put("pairs",pairs);
+                    jojo.put("pairs", pairs);
                 }
             }
         }
         return jo;
     }
 
-    private static HashMap<String,String> UNIT_MAP = new HashMap<String,String>(){
+    private static HashMap<String, String> UNIT_MAP = new HashMap<String, String>() {
         {
             String CONFIG_UNIT_HRU = "{\"HRU\": {\"DISTRIBUTION\": \"RASTER|SPATIAL_NONUNIQUE_HRUS\", \"UNITJSON\": \"hru_units.json\"}}";
             String CONFIG_UNIT_EXPLICITHRU = "{\"EXPLICITHRU\": {\"DISTRIBUTION\": \"RASTER|SPATIAL_UNIQUE_HRUS\", \"UNITJSON\": \"explicit_hru_units.json\"}}";
             String CONFIG_UNIT_CONNFIELD = "{\"CONNFIELD\": {\"DISTRIBUTION\": \"RASTER|FIELDS_15\", \"UNITJSON\": \"connected_field_units_updown_15.json\"}}";
             String CONFIG_UNIT_SLPPOS = "{\"SLPPOS\": {\"DISTRIBUTION\": \"RASTER|SLPPOS_UNITS\", \"UNITJSON\": \"slppos_3cls_units_updown.json\", \"SLPPOS_TAG_NAME\": {\"1\": \"summit\", \"4\": \"backslope\", \"16\": \"valley\"}}}";
-            put("HRU",CONFIG_UNIT_HRU);
-            put("EXPLICITHRU",CONFIG_UNIT_EXPLICITHRU);
-            put("CONNFIELD",CONFIG_UNIT_CONNFIELD);
-            put("SLPPOS",CONFIG_UNIT_SLPPOS);
+            put("HRU", CONFIG_UNIT_HRU);
+            put("EXPLICITHRU", CONFIG_UNIT_EXPLICITHRU);
+            put("CONNFIELD", CONFIG_UNIT_CONNFIELD);
+            put("SLPPOS", CONFIG_UNIT_SLPPOS);
         }
     };
-    private static boolean writeIniToFile(Wini ini, UUID id,String userName,String pureTimestamp) throws IOException{
-        String targetDir=String.format("data\\scenario\\%s@%s/%s",id.toString(),userName,pureTimestamp);
-        File file=new File(targetDir);
-        if(!file.exists()&&!file.mkdirs()){
+
+    private static boolean writeIniToFile(INIConfiguration ini, UUID id, String userName, String pureTimestamp) throws IOException, ConfigurationException {
+        String targetDir = String.format("data%sscenario%s%s@%s/%s",
+                PathConfig.SEP, PathConfig.SEP, id.toString(), userName, pureTimestamp);
+        File file = new File(targetDir);
+        if (!file.exists() && !file.mkdirs()) {
             return false;
         }
 
-        String filePath=targetDir+"\\user_sa.ini";
-        ini.store(new File(filePath));
+        String filePath = targetDir + PathConfig.SEP + "user_sa.ini";
+        ini.write(new FileWriter(new File(filePath)));
         return true;
     }
 }

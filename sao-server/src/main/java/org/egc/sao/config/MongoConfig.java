@@ -4,6 +4,8 @@ import com.mongodb.MongoClient;
 import org.egc.sao.dao.mongodb.StructBMPDao;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.convert.CustomConversions;
@@ -19,14 +21,34 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 @Configuration
 @EnableMongoRepositories(basePackageClasses = StructBMPDao.class)
 public class MongoConfig extends AbstractMongoConfiguration {
+    private static String HOST;
+    private static Integer PORT;
+    private static String DB_NAME;
+
+
+    @Value("${spring.data.mongodb.host}")
+    public void setIP(String host){
+        HOST = host;
+    }
+
+    @Value("${spring.data.mongodb.port}")
+    public void setPort(Integer port){
+        PORT = port;
+    }
+
+    @Value("${spring.data.mongodb.scenario-db-name}")
+    public void setDBName(String name){
+        DB_NAME = name;
+    }
+
     @Override
     protected String getDatabaseName() {
-        return "demo_youwuzhen30m_Scenario";
+        return DB_NAME;
     }
 
     @Override
     public MongoClient mongoClient() {
-        return new MongoClient("localhost",27017);
+        return new MongoClient(HOST,PORT);
     }
 
     @Override
