@@ -9,6 +9,9 @@ public class PathConfig {
     @Value("${path.seims-root}")
     public static String SEIMS;
 
+    @Value("${path.data}")
+    public static String DATA;
+
     public static String MODEL_PATH;
     public static String ANALYSIS_SCRIPT_PATH;
 //    public static String SEP= File.separator;
@@ -19,6 +22,11 @@ public class PathConfig {
     @Value("${path.seims-root}")
     public void setSEIMS(String seims) {
         SEIMS = getSepReplaced(seims);
+    }
+
+    @Value("${path.data}")
+    public void setDATA(String data) {
+        DATA = data;
     }
 
     private static String getSepReplaced(String path){

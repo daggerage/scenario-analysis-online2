@@ -33,7 +33,7 @@ public class CmdTaskService {
      */
     @Async
     public void AnalysisCmd(String storagePath, UUID scenarioAnalysisResultId) throws IOException {
-        String line = "python "+ PathConfig.ANALYSIS_SCRIPT_PATH +" -ini "+PathConfig.PROJECT_PATH+PathConfig.SEP+storagePath+PathConfig.SEP+"user_sa.ini";
+        String line = "python "+ PathConfig.ANALYSIS_SCRIPT_PATH +" -ini "+storagePath+PathConfig.SEP+"user_sa.ini";
         LOGGER.info(line);
 
         String storageResultDirPath=PathConfig.PROJECT_PATH+PathConfig.SEP +storagePath+PathConfig.SEP+"result";

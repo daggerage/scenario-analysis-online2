@@ -24,6 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.zip.ZipEntry;
@@ -31,7 +33,7 @@ import java.util.zip.ZipOutputStream;
 
 @RestController
 @RequestMapping("api/v1/scenario")
-@CrossOrigin(origins = "http://localhost:7099", maxAge = 3600)
+//@CrossOrigin(origins = "http://localhost:7099", maxAge = 3600)
 public class ScenarioController {
     private static final Logger LOGGER = LoggerFactory.getLogger(ScenarioController.class);
     private final UserService us;
@@ -105,7 +107,8 @@ public class ScenarioController {
             }
         }
 
-        File templateFile = new File(String.format("data%stemplate%sscenario_analysis_template.ini", PathConfig.SEP, PathConfig.SEP));
+        Path templatePath = Paths.get(PathConfig.DATA,"template","scenario_analysis_template.ini");
+        File templateFile = new File(templatePath.toString());
         INIConfiguration ini = new INIConfiguration();
         try {
             ini.read(new InputStreamReader(new FileInputStream(templateFile)));
@@ -149,15 +152,14 @@ public class ScenarioController {
         UUID resultId = UUID.randomUUID();
         LocalDateTime date = LocalDateTime.now();
         String pureTimestamp = DateUtil.parseLocalDateTimeToString(date, DateUtil.PATTERN_PURE);
-        String storageUrl = String.format("data%sscenario%s%s@%s%s%s",
-                PathConfig.SEP, PathConfig.SEP, user.getId(), user.getName(), PathConfig.SEP, pureTimestamp);
+        Path storageUrl = Paths.get(PathConfig.DATA,"scenario",user.getId().toString()+"@"+user.getName(),pureTimestamp);
         String resultUrl = storageUrl + PathConfig.SEP + "result";
 
         //add MODEL_DIR, BIN_DIR and SA_OUT_DIR
         SubnodeConfiguration sectionSEIMS = ini.getSection("SEIMS_Model");
         sectionSEIMS.addProperty("MODEL_DIR", PathConfig.MODEL_PATH);
         sectionSEIMS.addProperty("BIN_DIR", PathConfig.SEIMS + PathConfig.SEP + "bin");
-        sectionSEIMS.addProperty("SA_OUT_DIR", PathConfig.PROJECT_PATH + PathConfig.SEP + resultUrl);
+        sectionSEIMS.addProperty("SA_OUT_DIR", resultUrl);
 
 
         sars.insert(
@@ -186,7 +188,7 @@ public class ScenarioController {
         }
         if (isWriteSuccess) {
             cts.AnalysisCmd(
-                    storageUrl,
+                    storageUrl.toString(),
                     resultId
             );
             return new Result<>(ResInfo.SUCCESS, structBMP);
@@ -197,14 +199,23 @@ public class ScenarioController {
 
     @RequestMapping(value = "record", method = RequestMethod.GET)
     public Result listAllAnalysisRecord(
-            @RequestParam(value = "token") String token
+            @RequestParam(value = "token") String token,
+            @RequestParam(value = "resultId", required = false) String resultId
     ) {
         if (!AuthUtil.isJwtValide(token)) {
             return new Result<>(ResInfo.AUTH_FAIL, null);
         }
         User user = us.findUser(new User().setId(UUID.fromString(token)));
 
-        List<ScenarioRecord> records = srs.findAll(new ScenarioRecord().setAccountId(user.getId()));
+
+        List<ScenarioRecord> records = null;
+        if(resultId==null){
+            records=srs.findAll(new ScenarioRecord().setAccountId(user.getId()));
+        }else{
+            records=srs.findAll(
+                    new ScenarioRecord().setAccountId(user.getId()).setScenarioAnalysisResultId(UUID.fromString(resultId))
+            );
+        }
         return new Result<>(ResInfo.SUCCESS, records);
     }
 
@@ -408,8 +419,8 @@ public class ScenarioController {
     };
 
     private static boolean writeIniToFile(INIConfiguration ini, UUID id, String userName, String pureTimestamp) throws IOException, ConfigurationException {
-        String targetDir = String.format("data%sscenario%s%s@%s/%s",
-                PathConfig.SEP, PathConfig.SEP, id.toString(), userName, pureTimestamp);
+        String targetDir = Paths.get(
+                PathConfig.DATA,"scenario",id.toString()+"@"+userName,pureTimestamp).toString();
         File file = new File(targetDir);
         if (!file.exists() && !file.mkdirs()) {
             return false;

@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 
-export function scenarioAnalysis(structBmp, plantBmp, configUnit, configMethod, algorithm, generationNum, populationSize,maxEconomy, minEnvironment,title) {
+export function scenarioAnalysis(structBmp, plantBmp, configUnit, configMethod, algorithm, generationNum, populationSize, maxEconomy, minEnvironment, title) {
   return request({
     url: 'v1/scenario/analysis',
     method: 'post',
@@ -18,12 +18,14 @@ export function scenarioAnalysis(structBmp, plantBmp, configUnit, configMethod, 
     }
   })
 }
+
 export function fetchRecords() {
   return request({
     url: 'v1/scenario/record',
     method: 'get'
   })
 }
+
 export function fetchResults(resultIds) {
   let idStr = ''
   for (let item of resultIds) {
@@ -32,9 +34,10 @@ export function fetchResults(resultIds) {
   return request({
     url: 'v1/scenario/result',
     method: 'get',
-    params: { resultIds: idStr }
+    params: {resultIds: idStr}
   })
 }
+
 export function fetchMapFile(resultId, scenarioId) {
   return request({
     url: 'v1/scenario/file',
@@ -42,6 +45,16 @@ export function fetchMapFile(resultId, scenarioId) {
     params: {
       resultId: resultId,
       scenarioId: scenarioId
+    }
+  })
+}
+
+export function fetchConfigUnit(resultId) {
+  return request({
+    url: 'v1/scenario/record',
+    method: 'get',
+    params: {
+      resultId: resultId
     }
   })
 }

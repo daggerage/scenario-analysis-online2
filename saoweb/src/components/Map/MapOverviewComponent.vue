@@ -89,34 +89,11 @@ export default {
     this.initMap()
   },
   methods: {
-    addBaseLayer(){
-      var that=this
-      let vectorLayer = new VectorLayer({
-        source: new VectorSource({
-          url: this.dataUrl,
-          format: new GeoJSON()
-        }),
-        style: function(feature) {
-          if(that.gene && (that.gene[feature.values_['gridcode'] || feature.values_['SLPPOS_UNI']])){
-            // console.log(that.gene[feature.values_['gridcode'] || feature.values_['SLPPOS_UNI']])
-            console.log('style:'+that.bmpStylesMap[that.gene[feature.values_['gridcode'] || feature.values_['SLPPOS_UNI']]]);
-            // return that.bmpStylesMap[parseInt(that.gene[feature.values_['gridcode']||feature.values_['SLPPOS_UNI']])]
-            return that.bmpStylesMap[parseInt(that.gene[feature.values_['gridcode']||feature.values_['SLPPOS_UNI']])]
-
-          }else {
-            return that.style
-          }
-        }
-      })
-      let oldLayer = this.baseVectorLayer
-      this.baseVectorLayer = vectorLayer
-      if(oldLayer){
-        this.map.removeLayer(oldLayer)
-      }
-      this.map.addLayer(vectorLayer)
+    addBaseLayer() {
+      this.updateBaseLayerUnitUrl(this.dataUrl, this.gene)
     },
     initMap() {
-      var that=this
+      var that = this
       // 生成map
       const map = new Map({
         target: 'map',
@@ -284,18 +261,44 @@ export default {
         }
       })
     },
-    replaceBmpName
+    replaceBmpName,
+
+    updateBaseLayer(url, gene) {
+      var that = this
+      let vectorLayer = new VectorLayer({
+        source: new VectorSource({
+          url: url,
+          format: new GeoJSON()
+        }),
+        style: function(feature) {
+          if(gene && (gene[feature.values_['gridcode'] || feature.values_['SLPPOS_UNI']])){
+            // console.log('style:'+that.bmpStylesMap[that.gene[feature.values_['gridcode'] || feature.values_['SLPPOS_UNI']]]);
+            return that.bmpStylesMap[parseInt(gene[feature.values_['gridcode']||feature.values_['SLPPOS_UNI']])]
+
+          }else {
+            return that.style
+          }
+        }
+      })
+      let oldLayer = this.baseVectorLayer
+      this.baseVectorLayer = vectorLayer
+      if(oldLayer){
+        this.map.removeLayer(oldLayer)
+      }
+      this.map.addLayer(vectorLayer)
+    }
   },
   watch: {
-    geneAndUrl(newUrl,oldUrl){
-      var that=this
-      this.addBaseLayer()
+    geneAndUrl(newGeneUrl, oldGeneUrl) {
+      var that = this
+      console.log(newGeneUrl)
+      this.updateBaseLayer(newGeneUrl[1], newGeneUrl[0])
       for (let i = 0; i <this.bmps.length; i++) {
         var x=document.getElementsByClassName('legend-color')[i]
         if(!x){
           continue
         }
-        console.log(that.colors[i]);
+        // console.log(that.colors[i]);
         x.style.backgroundColor=that.colors[i]
       }
 
@@ -305,7 +308,7 @@ export default {
   computed:{
     geneAndUrl:function () {
       return [this.gene,this.dataUrl]
-    }
+    },
   }
 }
 </script>

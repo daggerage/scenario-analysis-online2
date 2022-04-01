@@ -1,5 +1,5 @@
 <template>
-    <div :class="className" :id="id" :style="{height:height,width:width}"/>
+  <div :class="className" :id="id" :style="{height:height,width:width}"/>
 </template>
 
 <script>
@@ -31,9 +31,9 @@ export default {
   data() {
     return {
       chart: null,
-      dataSeries:[],
-      selected:{},
-      colors:['#f1c40f','#1abc9c','#3498db','#9b59b6','#e74c3c','#ecf0f1','#d35400','#7f8c8d']
+      dataSeries: [],
+      selected: {},
+      colors: ['#f1c40f', '#1abc9c', '#3498db', '#9b59b6', '#e74c3c', '#ecf0f1', '#d35400', '#7f8c8d']
     }
   },
   mounted() {
@@ -70,34 +70,34 @@ export default {
         tooltip: {
           trigger: 'axis',
           axisPointer: {
-            type:'cross',
+            type: 'cross',
             textStyle: {
               color: '#fff'
             }
           }
         },
         toolbox: {
-          itemSize:40,
-          itemGap:30,
-          right:50,
-          top:5,
+          itemSize: 40,
+          itemGap: 30,
+          right: 50,
+          top: 5,
           feature: {
             mySelected: {
               show: true,
               title: '查看已选择的点',
-              icon: 'image://static/chart.png',
+              icon: 'image://chart.png',
               onclick: that.displaySelected
             },
             myBmp: {
               show: true,
               title: '查看选中点的情景配置',
-              icon: 'image://static/loupe.png',
+              icon: 'image://loupe.png',
               onclick: that.displayBmp
             },
-            myCancle:{
+            myCancle: {
               show: true,
               title: '取消所有选中',
-              icon: 'image://static/cancel.png',
+              icon: 'image://cancel.png',
               onclick: that.cancelSelected
             }
           }
@@ -117,18 +117,18 @@ export default {
           // type:'scroll',
           top: '10%',
           textStyle: {
-            fontSize:15,
+            fontSize: 15,
             color: '#fff'
           },
         },
         calculable: true,
         xAxis: [{
-          name:'economy',
-          nameTextStyle:{
-            fontSize:16,
-            padding:[5,0,0,0]
+          name: 'economy',
+          nameTextStyle: {
+            fontSize: 16,
+            padding: [5, 0, 0, 0]
           },
-          nameLocation:'middle',
+          nameLocation: 'middle',
           type: 'value',
           axisLine: {
             lineStyle: {
@@ -137,8 +137,8 @@ export default {
           },
           splitLine: {
             show: true,
-            lineStyle:{
-              type:'dashed'
+            lineStyle: {
+              type: 'dashed'
             }
           },
           axisTick: {
@@ -152,17 +152,17 @@ export default {
           }
         }],
         yAxis: [{
-          name:'environment',
-          nameLocation:'end',
-          nameTextStyle:{
-            fontSize:16,
-            padding:[0,0,0,50]
+          name: 'environment',
+          nameLocation: 'end',
+          nameTextStyle: {
+            fontSize: 16,
+            padding: [0, 0, 0, 50]
           },
           type: 'value',
           splitLine: {
             show: true,
-            lineStyle:{
-              type:'dashed'
+            lineStyle: {
+              type: 'dashed'
             }
           },
           axisLine: {
@@ -193,7 +193,8 @@ export default {
             color: '#d3dee5'
           },
           textStyle: {
-            color: '#fff' },
+            color: '#fff'
+          },
           borderColor: '#90979c'
 
         }, {
@@ -207,17 +208,20 @@ export default {
       })
     },
     initDataSeries() {
-      var that = this
-      let data = this.$store.records
+      const data = this.$store.records
+      const selected = this.$store.selected
 
       for (let i = 0; i < Object.keys(data).length; i++) {
-        let result=data[i]
+        let result = data[i]
+        console.log(result)
+        console.log(selected)
         let bb = []
         for (let dataIndex in result['pops']) {
           let point = result['pops'][dataIndex]
           bb.push({
-            value:[point['economy'], point['environment']],
-            scenario:point['scenario']
+            id: result['id'],
+            value: [point['economy'], point['environment']],
+            scenario: point['scenario']
           })
         }
         let item = {
@@ -247,38 +251,40 @@ export default {
         this.dataSeries.push(item)
       }
     },
-    addClickEvent(){
+    addClickEvent() {
       //TODO: 说什么好。。这段太糟心
-      var that=this
-      var data=this.$store.records
-      that.$store.selected=new Selected()
-      console.log(that.$store.selected)
-      this.chart.on('click',function(params){
-        var si=params.seriesIndex
-        var di=params.dataIndex
-        if(that.$store.selected.clickPoint(si,di)){
+      var that = this
+      var data = this.$store.records
+      that.$store.selected = new Selected()
+      this.chart.on('click', function (params) {
+
+        console.log('params:')
+        console.log(params)
+        var si = params.seriesIndex
+        var di = params.dataIndex
+        var recordId = params.data.id
+        if (that.$store.selected.clickPoint(si, di, recordId)) {
           that.chart.dispatchAction({
             type: 'highlight',
             seriesIndex: si,
-            dataIndex:di
+            dataIndex: di
           })
           that.$message({
-            message:'已选择: '+data[si].title+' - '+'第 '+(di+1)+' 个点',
-            type:'success',
-            duration:5000
+            message: '已选择: ' + data[si].title + ' - ' + '第 ' + (di + 1) + ' 个点',
+            type: 'success',
+            duration: 5000
           })
-        }else{
+        } else {
           that.chart.dispatchAction({
             type: 'downplay',
             seriesIndex: si,
-            dataIndex:di
+            dataIndex: di
           })
           that.$message({
-            message:'已取消选择: '+data[si].title+' - '+'第 '+(di+1)+' 个点',
-            type:'warning'
+            message: '已取消选择: ' + data[si].title + ' - ' + '第 ' + (di + 1) + ' 个点',
+            type: 'warning'
           })
         }
-        console.log(that.$store.selected)
       })
 
       // document.oncontextmenu = function () {
@@ -292,36 +298,36 @@ export default {
       //   })
       // })
     },
-    displaySelected(){
-      var that=this
-      for(let seriesIndex of Object.keys(that.selected)){
-        for(let pointIndex of Object.keys(that.selected[seriesIndex]['pops'])){
+    displaySelected() {
+      var that = this
+      for (let seriesIndex of Object.keys(that.selected)) {
+        for (let pointIndex of Object.keys(that.selected[seriesIndex]['pops'])) {
           that.chart.dispatchAction({
             type: 'highlight',
             seriesIndex: seriesIndex,
-            dataIndex:pointIndex
+            dataIndex: pointIndex
           })
           setTimeout(function () {
             that.chart.dispatchAction({
               type: 'downplay',
               seriesIndex: seriesIndex,
-              dataIndex:pointIndex
+              dataIndex: pointIndex
             })
-          },100)
+          }, 100)
           setTimeout(function () {
             that.chart.dispatchAction({
               type: 'highlight',
               seriesIndex: seriesIndex,
-              dataIndex:pointIndex
+              dataIndex: pointIndex
             })
-          },200)
+          }, 200)
         }
       }
     },
-    cancelSelected(){
-      var that=this
+    cancelSelected() {
+      var that = this
       for (let i = 0; i < Object.keys(that.selected).length; i++) {
-        let seriesName=Object.keys(that.selected)[i]
+        let seriesName = Object.keys(that.selected)[i]
         let series = that.selected[seriesName]
         that.chart.dispatchAction({
           type: 'downplay',
@@ -330,9 +336,9 @@ export default {
         delete that.selected[seriesName]
       }
     },
-    displayBmp(){
+    displayBmp() {
       this.$router.push({
-        path:'bmp-map'
+        path: 'bmp-map'
       })
     }
   }

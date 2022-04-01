@@ -15,7 +15,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("api/v1/bmp")
-@CrossOrigin(origins = "http://localhost:7099", maxAge = 3600)
+//@CrossOrigin(origins = "http://localhost:7099", maxAge = 3600)
 public class BMPController {
     private final StructBMPService sbs;
     private final PlantBMPService pbs;

@@ -18,6 +18,7 @@ public class MappersTest {
     @Test
     public void whateverIWantToTest(){
         System.out.println(PathConfig.SEIMS);
+        System.out.println(PathConfig.DATA);
         System.out.println(PathConfig.MODEL_PATH);
         System.out.println(PathConfig.ANALYSIS_SCRIPT_PATH);
         System.out.println(PathConfig.PROJECT_PATH);

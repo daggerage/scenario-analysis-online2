@@ -5,7 +5,7 @@ import { getToken } from '@/utils/auth'
 
 // create an axios instance
 const service = axios.create({
-  baseURL: process.env.BASE_API, // api 的 base_url
+  baseURL: process.env.VUE_APP_BASE_API, // api 的 base_url
   timeout: 5000 // request timeout
 })
 
@@ -13,7 +13,6 @@ const service = axios.create({
 service.interceptors.request.use(
   config => {
     // Do something before request is sent
-    console.log(config)
     if (store.getters.token) {
       // 让每个请求携带token-- ['X-Token']为自定义key 请根据实际情况自行修改
       if (!config.params) {
