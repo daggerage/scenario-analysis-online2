@@ -252,14 +252,10 @@ export default {
       }
     },
     addClickEvent() {
-      //TODO: 说什么好。。这段太糟心
       var that = this
       var data = this.$store.records
       that.$store.selected = new Selected()
-      this.chart.on('click', function (params) {
-
-        console.log('params:')
-        console.log(params)
+      this.chart.on('click', function(params) {
         var si = params.seriesIndex
         var di = params.dataIndex
         var recordId = params.data.id
@@ -300,8 +296,13 @@ export default {
     },
     displaySelected() {
       var that = this
-      for (let seriesIndex of Object.keys(that.selected)) {
-        for (let pointIndex of Object.keys(that.selected[seriesIndex]['pops'])) {
+      console.log(that.$store.selected)
+
+      for (let seriesIndex of Object.keys(that.$store.selected.getData())) {
+        for (let pointIndex of that.$store.selected.getData()[seriesIndex].points) {
+          console.log('高亮si di：')
+          console.log(seriesIndex)
+          console.log(pointIndex)
           that.chart.dispatchAction({
             type: 'highlight',
             seriesIndex: seriesIndex,
